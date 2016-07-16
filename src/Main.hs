@@ -48,8 +48,6 @@ foreign import ccall
     GEOSGeometryPtr ->
     GEOSGeometryPtr
 
-foreign import ccall "helpers.h multiply" c_multiply :: CInt -> CInt -> CInt
-
 withGEOS :: (GEOSContextHandle_t -> IO a) -> IO a
 withGEOS = bracket c_initializeGEOSWithHandlers c_uninitializeGEOS
 
