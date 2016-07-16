@@ -24,9 +24,17 @@ foreign import ccall "helpers.h getErrorMessage"
 foreign import ccall "GEOSWKTReader_create_r" c_GEOSWKTReader_create_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr
 
 -- Should probably be in IO
+-- Should add a bracketing function to ensure that this is called
+-- correctly.
 foreign import ccall "GEOSWKTReader_destroy_r" c_GEOSWKTReader_destroy_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> ()
 
 -- Should probably be in IO
+-- Open question: How to manage lifetime of returned GEOSGeometryPtr?
+-- I would like to use ForeignPtr to wrap it so that the native pointer
+-- is automatically deleted using GEOSGeom_destroy_t. Unfortunately,
+-- this function requires a GEOSContextHandle_t, so I'm not sure how to
+-- wrap it yet. An alternative would be to provide a wrapping "bracket"-
+-- style function, but this would be ugly.
 foreign import ccall "GEOSWKTReader_read_r" c_GEOSWKTReader_read_r ::
     GEOSContextHandle_t ->
     GEOSWKTReaderPtr ->
