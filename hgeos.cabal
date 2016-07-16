@@ -1,6 +1,6 @@
 name:                 hgeos
 version:              0.1.0.0
-synopsis:             Simple, clean project template using MIT License by default
+synopsis:             Haskell bindings to GEOS C API
 description:          Please see README.md
 homepage:             https://github.com/rcook/hgeos#readme
 license:              MIT
@@ -21,6 +21,7 @@ executable hgeos
   main-is:            Main.hs
   default-language:   Haskell2010
   build-depends:      base >= 4.7 && < 5
+  extra-libraries:    geos_c
 
 test-suite doctests
   type:               exitcode-stdio-1.0
