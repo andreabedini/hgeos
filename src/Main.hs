@@ -20,8 +20,13 @@ foreign import ccall "helpers.h getNoticeMessage"
 foreign import ccall "helpers.h getErrorMessage"
     c_getErrorMessage :: IO CString
 
+-- Should probably be in IO
 foreign import ccall "GEOSWKTReader_create_r" c_GEOSWKTReader_create_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr
+
+-- Should probably be in IO
 foreign import ccall "GEOSWKTReader_destroy_r" c_GEOSWKTReader_destroy_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> ()
+
+-- Should probably be in IO
 foreign import ccall "GEOSWKTReader_read_r" c_GEOSWKTReader_read_r ::
     GEOSContextHandle_t ->
     GEOSWKTReaderPtr ->
@@ -35,6 +40,7 @@ readGeometry h r wkt =
         isNull :: GEOSGeometryPtr -> Bool
         isNull (GEOSGeometryPtr p) = p == nullPtr
 
+-- Should this be considered pure?
 foreign import ccall
     "GEOSIntersection_r" c_GEOSIntersection_r ::
     GEOSContextHandle_t ->
