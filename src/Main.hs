@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import Control.Exception
 import Foreign.C
 import Data.Geocoding.GEOS.HighLevelAPI
 import Data.Geocoding.GEOS.LowLevelAPI
