@@ -135,6 +135,23 @@ static void freeStrings(struct String* string)
     }
 }
 
+static struct Geometry* createGeometry(struct Context* ctx, GEOSGeometry* handle)
+{
+    assert(ctx);
+    assert(handle);
+
+    struct Geometry* geometry = (struct Geometry*)malloc(sizeof(struct Geometry));
+    assert(geometry);
+    memset(geometry, 0, sizeof(struct Geometry));
+
+    geometry->ctx = ctx;
+    geometry->handle = handle;
+    geometry->tail = ctx->headGeometry;
+    ctx->headGeometry = geometry;
+
+    return geometry;
+}
+
 ContextPtr createContext()
 {
     struct Context* ctx = (struct Context*)malloc(sizeof(struct Context));
@@ -183,18 +200,11 @@ GeometryPtr readerRead(ReaderPtr reader, const char* wkt)
     assert(reader);
     assert(wkt);
 
-    struct Geometry* geometry = (struct Geometry*)malloc(sizeof(struct Geometry));
-    assert(geometry);
-    memset(geometry, 0, sizeof(struct Geometry));
-
-    geometry->ctx = reader->ctx;
     TRACE("GEOSWKTReader_read_r");
-    geometry->handle = GEOSWKTReader_read_r(reader->ctx->handle, reader->handle, wkt);
-    assert(geometry->handle);
-    geometry->tail = reader->ctx->headGeometry;
-    reader->ctx->headGeometry = geometry;
+    GEOSGeometry* handle = GEOSWKTReader_read_r(reader->ctx->handle, reader->handle, wkt);
+    assert(handle);
 
-    return geometry;
+    return createGeometry(reader->ctx, handle);
 }
 
 WriterPtr contextCreateWriter(ContextPtr ctx)
@@ -239,16 +249,9 @@ GeometryPtr contextIntersection(GeometryPtr g0, GeometryPtr g1)
     assert(g0);
     assert(g1);
 
-    struct Geometry* geometry = (struct Geometry*)malloc(sizeof(struct Geometry));
-    assert(geometry);
-    memset(geometry, 0, sizeof(struct Geometry));
-
-    geometry->ctx = g0->ctx;
     TRACE("GEOSIntersection_r");
-    geometry->handle = GEOSIntersection_r(g0->ctx->handle, g0->handle, g1->handle);
-    assert(geometry->handle);
-    geometry->tail = g0->ctx->headGeometry;
-    g0->ctx->headGeometry = geometry;
+    GEOSGeometry* handle = GEOSIntersection_r(g0->ctx->handle, g0->handle, g1->handle);
+    assert(handle);
 
-    return geometry;
+    return createGeometry(g0->ctx, handle);
 }
