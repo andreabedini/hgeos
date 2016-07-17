@@ -30,16 +30,13 @@ lowLevelAPIDemo = do
 
 highLevelAPIDemo :: IO ()
 highLevelAPIDemo = do
-    wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
-    wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
     withContext $ \ctx -> do
-        reader <- c_contextCreateReader ctx
-        g0 <- c_readerRead reader wkt0
-        g1 <- c_readerRead reader wkt1
-        g2 <- c_contextIntersection g0 g1
-        writer <- c_contextCreateWriter ctx
-        cs2 <- c_writerWrite writer g2
-        s2 <- peekCString cs2
+        r <- mkReader ctx
+        g0 <- readGeometry r "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
+        g1 <- readGeometry r "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
+        g2 <- intersection g0 g1
+        w <- mkWriter ctx
+        s2 <- writeGeometry w g2
         print s2
         putStrLn "highLevelAPIDemo done"
 
