@@ -14,6 +14,7 @@ rawApiDemo = do
 
     withGEOS $ \h -> do
         (g0, g1) <- withWKTReader h $ \reader -> do
+            -- Bangs required so reads occur before context is destroyed
             !(Just g0) <- wrap <$> c_GEOSWKTReader_read_r h reader wkt0
             !(Just g1) <- wrap <$> c_GEOSWKTReader_read_r h reader wkt1
             return (g0, g1)
