@@ -160,13 +160,6 @@ void contextDestroy(ContextPtr ctx)
     free(ctx);
 }
 
-GEOSContextHandle_t contextGetHandle(ContextPtr ctx)
-{
-    assert(ctx);
-
-    return ctx->handle;
-}
-
 ReaderPtr contextCreateReader(ContextPtr ctx)
 {
     assert(ctx);

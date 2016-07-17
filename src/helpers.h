@@ -16,7 +16,6 @@ typedef struct Geometry* GeometryPtr;
 
 ContextPtr createContext();
 void contextDestroy(ContextPtr ctx);
-GEOSContextHandle_t contextGetHandle(ContextPtr ctx);
 
 ReaderPtr contextCreateReader(ContextPtr ctx);
 GeometryPtr readerRead(ReaderPtr reader, const char* wkt);
