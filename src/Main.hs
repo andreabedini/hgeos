@@ -31,24 +31,8 @@ foreign import ccall "GEOSWKTReader_create_r"
     c_GEOSWKTReader_create_r :: GEOSContextHandle_t -> IO GEOSWKTReaderPtr
 foreign import ccall "GEOSWKTReader_destroy_r"
     c_GEOSWKTReader_destroy_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> IO ()
-
--- Should probably be in IO
--- Open question: How to manage lifetime of returned GEOSGeometryPtr?
--- I would like to use ForeignPtr to wrap it so that the native pointer
--- is automatically deleted using GEOSGeom_destroy_t. Unfortunately,
--- this function requires a GEOSContextHandle_t, so I'm not sure how to
--- wrap it yet. An alternative would be to provide a wrapping "bracket"-
--- style function, but this would be ugly.
 foreign import ccall "GEOSWKTReader_read_r"
-    c_GEOSWKTReader_read_r ::
-    GEOSContextHandle_t ->
-    GEOSWKTReaderPtr ->
-    CString ->
-    GEOSGeometryPtr
-readGeometry :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> CString -> Maybe GEOSGeometryPtr
-readGeometry h r wkt =
-    let g = c_GEOSWKTReader_read_r h r wkt
-    in if isNull g then Nothing else Just g
+    c_GEOSWKTReader_read_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> CString -> IO GEOSGeometryPtr
 
 foreign import ccall "GEOSWKTWriter_create_r"
     c_GEOSWKTWriter_create_r :: GEOSContextHandle_t -> IO GEOSWKTWriterPtr
@@ -57,17 +41,8 @@ foreign import ccall "GEOSWKTWriter_destroy_r"
 foreign import ccall "GEOSWKTWriter_write_r"
     c_GEOSWKTWriter_write_r :: GEOSContextHandle_t -> GEOSWKTWriterPtr -> GEOSGeometryPtr -> IO CString
 
--- Should this be considered pure?
 foreign import ccall "GEOSIntersection_r"
-    c_GEOSIntersection_r ::
-    GEOSContextHandle_t ->
-    GEOSGeometryPtr ->
-    GEOSGeometryPtr ->
-    GEOSGeometryPtr
-intersection :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> Maybe GEOSGeometryPtr
-intersection h g0 g1 =
-    let g2 = c_GEOSIntersection_r h g0 g1
-    in if isNull g2 then Nothing else Just g2
+    c_GEOSIntersection_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 isNull :: GEOSGeometryPtr -> Bool
 isNull (GEOSGeometryPtr p) = p == nullPtr
@@ -81,6 +56,16 @@ withWKTReader h = bracket (c_GEOSWKTReader_create_r h) (c_GEOSWKTReader_destroy_
 withWKTWriter :: GEOSContextHandle_t -> (GEOSWKTWriterPtr -> IO a) -> IO a
 withWKTWriter h = bracket (c_GEOSWKTWriter_create_r h) (c_GEOSWKTWriter_destroy_r h)
 
+readGeometry :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> CString -> IO (Maybe GEOSGeometryPtr)
+readGeometry h r wkt = do
+    g <- c_GEOSWKTReader_read_r h r wkt
+    return $ if isNull g then Nothing else Just g
+
+intersection :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO (Maybe GEOSGeometryPtr)
+intersection h g0 g1 = do
+    g2 <- c_GEOSIntersection_r h g0 g1
+    return $ if isNull g2 then Nothing else Just g2
+
 main :: IO ()
 main = do
     let cs = c_GEOSversion
@@ -92,10 +77,10 @@ main = do
 
     void $ withGEOS $ \h -> do
         (g0, g1) <- withWKTReader h $ \reader -> do
-            let !(Just g0) = readGeometry h reader wkt0
-                !(Just g1) = readGeometry h reader wkt1
+            !(Just g0) <- readGeometry h reader wkt0
+            !(Just g1) <- readGeometry h reader wkt1
             return (g0, g1)
-        let (Just g2) = intersection h g0 g1
+        !(Just g2) <- intersection h g0 g1
         print g0
         print g1
         print g2
