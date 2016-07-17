@@ -24,6 +24,7 @@ executable hgeos
   extra-libraries:    geos_c
   c-sources:          src/helpers.c
   includes:           src/helpers.h
+  cc-options:         -std=c99 -pthread
 
 test-suite doctests
   type:               exitcode-stdio-1.0
