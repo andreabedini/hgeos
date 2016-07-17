@@ -3,6 +3,7 @@
 module Main (main) where
 
 import Control.Exception
+import Control.Monad
 import Foreign.C
 import Foreign.Ptr
 import Data.Geocoding.GEOS.Imports
@@ -23,12 +24,21 @@ wrap g@(GEOSGeometryPtr p) = if p == nullPtr then Nothing else Just g
 instance Show GEOSGeometryPtr where
     show (GEOSGeometryPtr p) = show p
 
-main :: IO ()
-main = do
-    let cs = c_GEOSversion
-    s <- peekCString cs
-    putStrLn s
+-- TODO: Looks kinda state-monady
+data Context = Context
+    { handle :: GEOSContextHandle_t
+    , geometries :: [GEOSGeometryPtr]}
 
+readGeometry :: Context -> GEOSWKTReaderPtr -> CString -> IO (Maybe GEOSGeometryPtr, Context)
+readGeometry ctx@(Context h _) reader wkt = do
+    g@(GEOSGeometryPtr p) <- c_GEOSWKTReader_read_r h reader wkt
+    return $
+        if p == nullPtr
+        then (Nothing, ctx)
+        else (Just g, ctx { geometries = geometries ctx ++ [g] })
+
+rawApiDemo :: IO ()
+rawApiDemo = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
     wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
 
@@ -49,4 +59,33 @@ main = do
         c_GEOSGeom_destroy_r h g2 -- TODO: Use bracket
         c_GEOSGeom_destroy_r h g1 -- TODO: Use bracket
         c_GEOSGeom_destroy_r h g0 -- TODO: Use bracket
-    putStrLn "Done"
+        putStrLn "rawApiDemo done"
+
+mkContext :: IO Context
+mkContext = c_initializeGEOSWithHandlers >>= \h -> return $ Context h []
+
+destroyContext :: Context -> IO ()
+destroyContext (Context h _) = c_uninitializeGEOS h
+
+higherLevelApiDemo :: IO ()
+higherLevelApiDemo = do
+    wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
+    wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
+    bracket mkContext destroyContext $ \c0@(Context h _) -> do
+        (g0, g1, c1) <- withWKTReader h $ \reader -> do
+            !(Just g0, c1) <- readGeometry c0 reader wkt0
+            !(Just g1, c2) <- readGeometry c1 reader wkt1
+            return (g0, g1, c1)
+        print g0
+        print g1
+        let (Context h gs) = c1
+        forM_ gs (c_GEOSGeom_destroy_r h)
+        putStrLn "higherLevelApiDemo done"
+
+main :: IO ()
+main = do
+    s <- peekCString c_GEOSversion
+    putStrLn s
+
+    rawApiDemo
+    higherLevelApiDemo
