@@ -32,7 +32,7 @@ higherLevelApiDemo :: IO ()
 higherLevelApiDemo = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
     wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
-    bracket c_createContext c_contextDestroy $ \ctx -> do
+    withContext $ \ctx -> do
         reader <- c_contextCreateReader ctx
         g0 <- c_readerRead reader wkt0
         g1 <- c_readerRead reader wkt1
