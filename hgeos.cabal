@@ -25,7 +25,9 @@ executable hgeos
   c-sources:          src/helpers.c
   includes:           src/helpers.h
   cc-options:         -std=c99 -pthread
-  other-modules:      Data.Geocoding.GEOS.HighLevelImports
+  other-modules:      Data.Geocoding.GEOS.HighLevelAPI
+                    , Data.Geocoding.GEOS.HighLevelImports
+                    , Data.Geocoding.GEOS.LowLevelAPI
                     , Data.Geocoding.GEOS.LowLevelImports
 
 test-suite doctests
