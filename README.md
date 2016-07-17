@@ -2,6 +2,8 @@
 
 Demonstrates Haskell binding to the [GEOS][geos] [C API][capi]
 
+Heavily inspired by [Django GEOS bindings][djangogis]
+
 ## Development
 
 This project uses [Stack][stack].
@@ -33,6 +35,7 @@ Released under MIT License
 Copyright (c) 2016 Richard Cook
 
 [capi]: http://geos.osgeo.org/doxygen/geos__c_8h_source.html
+[djangogis]: https://github.com/django/django/tree/master/django/contrib/gis/geos
 [geos]: https://trac.osgeo.org/geos/
 [homebrew]: http://brew.sh/
 [stack]: https://haskellstack.org/
