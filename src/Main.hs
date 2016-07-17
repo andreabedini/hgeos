@@ -6,8 +6,8 @@ import Foreign.C
 import Data.Geocoding.GEOS.HighLevelAPI
 import Data.Geocoding.GEOS.LowLevelAPI
 
-rawApiDemo :: IO ()
-rawApiDemo = do
+lowLevelAPIDemo :: IO ()
+lowLevelAPIDemo = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
     wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
 
@@ -26,10 +26,10 @@ rawApiDemo = do
         c_GEOSGeom_destroy_r h g2 -- TODO: Use bracket
         c_GEOSGeom_destroy_r h g1 -- TODO: Use bracket
         c_GEOSGeom_destroy_r h g0 -- TODO: Use bracket
-        putStrLn "rawApiDemo done"
+        putStrLn "lowLevelAPIDemo done"
 
-higherLevelApiDemo :: IO ()
-higherLevelApiDemo = do
+highLevelAPIDemo :: IO ()
+highLevelAPIDemo = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
     wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
     withContext $ \ctx -> do
@@ -41,11 +41,11 @@ higherLevelApiDemo = do
         cs2 <- c_writerWrite writer g2
         s2 <- peekCString cs2
         print s2
-        putStrLn "higherLevelApiDemo done"
+        putStrLn "highLevelAPIDemo done"
 
 main :: IO ()
 main = do
     s <- peekCString c_GEOSversion
     putStrLn s
-    rawApiDemo
-    higherLevelApiDemo
+    lowLevelAPIDemo
+    highLevelAPIDemo

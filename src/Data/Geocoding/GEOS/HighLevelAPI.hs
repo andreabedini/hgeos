@@ -1,6 +1,10 @@
 module Data.Geocoding.GEOS.HighLevelAPI
-    ( module Data.Geocoding.GEOS.HighLevelImports
-    , withContext
+    ( withContext
+    , c_contextCreateReader
+    , c_contextCreateWriter
+    , c_contextIntersection
+    , c_readerRead
+    , c_writerWrite
     ) where
 
 import Control.Exception
