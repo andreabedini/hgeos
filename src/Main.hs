@@ -76,8 +76,8 @@ foreign import ccall "helpers.h createContext"
     c_createContext :: IO ContextPtr
 foreign import ccall "helpers.h contextDestroy"
     c_contextDestroy :: ContextPtr -> IO ()
-foreign import ccall "helpers.h contextGetHandle"
-    c_contextGetHandle :: ContextPtr -> IO GEOSContextHandle_t
+--foreign import ccall "helpers.h contextGetHandle"
+--    c_contextGetHandle :: ContextPtr -> IO GEOSContextHandle_t
 foreign import ccall "helpers.h contextCreateReader"
     c_contextCreateReader :: ContextPtr -> IO ReaderPtr
 foreign import ccall "helpers.h readerRead"
@@ -86,6 +86,8 @@ foreign import ccall "helpers.h contextCreateWriter"
     c_contextCreateWriter :: ContextPtr -> IO WriterPtr
 foreign import ccall "helpers.h writerWrite"
     c_writerWrite :: WriterPtr -> GeometryPtr -> IO CString
+foreign import ccall "helpers.h contextIntersection"
+    c_contextIntersection :: GeometryPtr -> GeometryPtr -> IO GeometryPtr
 
 higherLevelApiDemo :: IO ()
 higherLevelApiDemo = do
@@ -93,32 +95,14 @@ higherLevelApiDemo = do
     wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
     bracket c_createContext c_contextDestroy $ \ctx -> do
         reader <- c_contextCreateReader ctx
-        g0@(GeometryPtr p0) <- c_readerRead reader wkt0
-        g1@(GeometryPtr p1) <- c_readerRead reader wkt1
+        g0 <- c_readerRead reader wkt0
+        g1 <- c_readerRead reader wkt1
+        g2 <- c_contextIntersection g0 g1
         writer <- c_contextCreateWriter ctx
-        cs0 <- c_writerWrite writer g0
-        s0 <- peekCString cs0
-        cs1 <- c_writerWrite writer g1
-        s1 <- peekCString cs1
-        print p0
-        print s0
-        print p1
-        print s1
+        cs2 <- c_writerWrite writer g2
+        s2 <- peekCString cs2
+        print s2
         putStrLn "higherLevelApiDemo done"
-
-    {-
-    wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
-    wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
-    bracket mkContext destroyContext $ \c0@(Context h _) -> do
-        (g0, g1, c1) <- withWKTReader h $ \reader -> do
-            !(Just g0, c1) <- readGeometry c0 reader wkt0
-            !(Just g1, c2) <- readGeometry c1 reader wkt1
-            return (g0, g1, c1)
-        print g0
-        print g1
-        let (Context h gs) = c1
-        forM_ gs (c_GEOSGeom_destroy_r h)
-    -}
 
 main :: IO ()
 main = do

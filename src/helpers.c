@@ -240,3 +240,22 @@ char* writerWrite(WriterPtr writer, GeometryPtr geometry)
 
     return string->handle;
 }
+
+GeometryPtr contextIntersection(GeometryPtr g0, GeometryPtr g1)
+{
+    assert(g0);
+    assert(g1);
+
+    struct Geometry* geometry = (struct Geometry*)malloc(sizeof(struct Geometry));
+    assert(geometry);
+    memset(geometry, 0, sizeof(struct Geometry));
+
+    geometry->ctx = g0->ctx;
+    TRACE("GEOSIntersection_r");
+    geometry->handle = GEOSIntersection_r(g0->ctx->handle, g0->handle, g1->handle);
+    assert(geometry->handle);
+    geometry->tail = g0->ctx->headGeometry;
+    g0->ctx->headGeometry = geometry;
+
+    return geometry;
+}
