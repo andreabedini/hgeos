@@ -3,6 +3,7 @@ module Data.Geocoding.GEOS.HighLevelAPI
     , withContext
     ) where
 
+import Control.Exception
 import Data.Geocoding.GEOS.HighLevelImports
 
 withContext :: (ContextPtr -> IO a) -> IO a
