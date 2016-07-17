@@ -1,4 +1,4 @@
-module Data.Geocoding.GEOS.Imports where
+module Data.Geocoding.GEOS.LowLevelImports where
 
 import Foreign.C
 import Foreign.Ptr
