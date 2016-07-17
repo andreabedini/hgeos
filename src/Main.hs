@@ -19,6 +19,10 @@ withWKTWriter h = bracket (c_GEOSWKTWriter_create_r h) (c_GEOSWKTWriter_destroy_
 wrap :: GEOSGeometryPtr -> Maybe GEOSGeometryPtr
 wrap g@(GEOSGeometryPtr p) = if p == nullPtr then Nothing else Just g
 
+-- TODO: Just show raw pointer value for now!
+instance Show GEOSGeometryPtr where
+    show (GEOSGeometryPtr p) = show p
+
 main :: IO ()
 main = do
     let cs = c_GEOSversion

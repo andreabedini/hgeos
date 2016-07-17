@@ -4,7 +4,7 @@ import Foreign.C
 import Foreign.Ptr
 
 newtype GEOSContextHandle_t = GEOSContextHandle_t (Ptr GEOSContextHandle_t)
-newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr) deriving Show
+newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr)
 newtype GEOSWKTReaderPtr = GEOSWKTReaderPtr (Ptr GEOSWKTReaderPtr)
 newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
 
