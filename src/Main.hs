@@ -35,9 +35,12 @@ highLevelAPIDemo = do
         g0 <- readGeometry r "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
         g1 <- readGeometry r "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
         g2 <- intersection g0 g1
+        g3 <- envelope g2
+
         w <- mkWriter ctx
-        s2 <- writeGeometry w g2
-        print s2
+        s3 <- writeGeometry w g3
+        print s3
+
         putStrLn "highLevelAPIDemo done"
 
 main :: IO ()

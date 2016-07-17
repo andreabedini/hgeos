@@ -1,9 +1,10 @@
 module Data.Geocoding.GEOS.HighLevelAPI
-    ( withContext
+    ( envelope
     , intersection
-    , mkWriter
     , mkReader
+    , mkWriter
     , readGeometry
+    , withContext
     , writeGeometry
     ) where
 
@@ -25,6 +26,9 @@ mkWriter = c_contextCreateWriter
 
 writeGeometry :: WriterPtr -> GeometryPtr -> IO String
 writeGeometry w g = c_writerWrite w g >>= peekCString
+
+envelope :: GeometryPtr -> IO GeometryPtr
+envelope = c_contextEnvelope
 
 intersection :: GeometryPtr -> GeometryPtr -> IO GeometryPtr
 intersection = c_contextIntersection

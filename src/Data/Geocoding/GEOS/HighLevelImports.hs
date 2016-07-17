@@ -23,5 +23,7 @@ foreign import ccall "helpers.h contextCreateWriter"
 foreign import ccall "helpers.h writerWrite"
     c_writerWrite :: WriterPtr -> GeometryPtr -> IO CString
 
+foreign import ccall "helpers.h contextEnvelope"
+    c_contextEnvelope :: GeometryPtr -> IO GeometryPtr
 foreign import ccall "helpers.h contextIntersection"
     c_contextIntersection :: GeometryPtr -> GeometryPtr -> IO GeometryPtr

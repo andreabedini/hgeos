@@ -244,6 +244,17 @@ char* writerWrite(WriterPtr writer, GeometryPtr geometry)
     return string->handle;
 }
 
+GeometryPtr contextEnvelope(GeometryPtr g)
+{
+    assert(g);
+
+    TRACE("GEOSEnvelope_r");
+    GEOSGeometry* handle = GEOSEnvelope_r(g->ctx->handle, g->handle);
+    assert(handle);
+
+    return createGeometry(g->ctx, handle);
+}
+
 GeometryPtr contextIntersection(GeometryPtr g0, GeometryPtr g1)
 {
     assert(g0);

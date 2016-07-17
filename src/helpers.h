@@ -23,4 +23,5 @@ GeometryPtr readerRead(ReaderPtr reader, const char* wkt);
 WriterPtr contextCreateWriter(ContextPtr ctx);
 char* writerWrite(WriterPtr writer, GeometryPtr geometry);
 
+GeometryPtr contextEnvelope(GeometryPtr g);
 GeometryPtr contextIntersection(GeometryPtr g0, GeometryPtr g1);
