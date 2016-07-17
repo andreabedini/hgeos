@@ -3,7 +3,6 @@
 module Main (main) where
 
 import Control.Exception
-import Control.Monad
 import Foreign.C
 import Foreign.Ptr
 
@@ -78,7 +77,7 @@ main = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
     wkt1 <- newCString "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
 
-    void $ withGEOS $ \h -> do
+    withGEOS $ \h -> do
         (g0, g1) <- withWKTReader h $ \reader -> do
             !(Just g0) <- readGeometry h reader wkt0
             !(Just g1) <- readGeometry h reader wkt1
@@ -91,7 +90,7 @@ main = do
             g2cs <- c_GEOSWKTWriter_write_r h writer g2
             g2Str <- peekCString g2cs
             print g2Str
-            void $ c_GEOSFree_r_CChar h g2cs
+            c_GEOSFree_r_CChar h g2cs
         c_GEOSGeom_destroy_r h g2
         c_GEOSGeom_destroy_r h g1
         c_GEOSGeom_destroy_r h g0
