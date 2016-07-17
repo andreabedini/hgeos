@@ -5,7 +5,7 @@ module Main (main) where
 import Control.Exception
 import Foreign.C
 import Foreign.Ptr
-import Imports
+import Data.Geocoding.GEOS.Imports
 
 withGEOS :: (GEOSContextHandle_t -> IO a) -> IO a
 withGEOS = bracket c_initializeGEOSWithHandlers c_uninitializeGEOS
