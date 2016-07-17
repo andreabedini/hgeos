@@ -15,6 +15,9 @@ newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
 foreign import ccall "GEOSversion"
     c_GEOSversion :: CString
 
+foreign import ccall "GEOSFree_r"
+    c_GEOSFree_r_CChar :: GEOSContextHandle_t -> Ptr CChar -> IO ()
+
 foreign import ccall "helpers.h initializeGEOSWithHandlers"
     c_initializeGEOSWithHandlers :: IO GEOSContextHandle_t
 foreign import ccall "helpers.h uninitializeGEOS"
@@ -88,6 +91,7 @@ main = do
             g2cs <- c_GEOSWKTWriter_write_r h writer g2
             g2Str <- peekCString g2cs
             print g2Str
+            void $ c_GEOSFree_r_CChar h g2cs
         c_GEOSGeom_destroy_r h g2
         c_GEOSGeom_destroy_r h g1
         c_GEOSGeom_destroy_r h g0
