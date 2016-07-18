@@ -7,6 +7,9 @@ import Foreign.C
 import Foreign.Ptr
 
 -- Demonstrates direct use of imports
+-- Lifetimes of various GEOS objects, including readers, writers and
+-- geometries, must be managed explicitly by clients using explicit calls to
+-- various destroy/free functions
 lowLevelAPIDemo :: IO ()
 lowLevelAPIDemo = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
@@ -38,6 +41,8 @@ lowLevelAPIDemo = do
                 (c_GEOSGeom_destroy_r ctx)
 
 -- Demonstrates use of high-level API
+-- Lifetimes of GEOS objects are automatically managed by the context objects
+-- which guarantees that they are released when the context goes out of scope
 highLevelAPIDemo :: IO ()
 highLevelAPIDemo = do
     withContext $ \ctx -> do
