@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  READLINK=greadlink
+else
+  READLINK=readlink
+fi
+SCRIPTPATH=$($READLINK -f $0)
+SCRIPTDIR=$(dirname $SCRIPTPATH)
+REPODIR=$(dirname $SCRIPTDIR)
+
+if [ "$#" -ne 1 ]; then
+  echo Usage: $0 HACKAGEUSER
+  exit 1
+fi
+HACKAGEUSER=$1
+
+cd $REPODIR
+
+CABALFILE=$(find . -maxdepth 1 -name "*.cabal" -print -quit)
+if [ ! -f "$CABALFILE" ]; then
+  echo Could not find .cabal file
+  exit 1
+fi
+
+PACKAGENAME=$(awk -F ":[[:space:]]*" 'tolower($1)=="name" { print $2 }' < "$CABALFILE")
+if [ -z "$PACKAGENAME" ]; then
+  echo "Unable to determine package name"
+  exit 1
+fi
+
+PACKAGEVER=$(awk -F ":[[:space:]]*" 'tolower($1)=="version" { print $2 }' < "$CABALFILE")
+if [ -z "$PACKAGEVER" ]; then
+  echo "Unable to determine package version"
+  exit 1
+fi
+
+stack build --haddock
+
+TEMPDIR=$(mktemp -d HADDOCKS.XXXXXX)
+trap 'rm -r "$TEMPDIR"' EXIT
+
+DOCDIR=$PACKAGENAME-$PACKAGEVER-docs
+cp -r $(stack path --local-doc-root)/$PACKAGENAME-$PACKAGEVER $TEMPDIR/$DOCDIR
+
+sed -i 's/href="\.\.\/\([^/]*\)\//href="..\/..\/\1\/docs\//g' $TEMPDIR/$DOCDIR/*.html
+(cd $TEMPDIR && tar cvz --format=ustar -f $DOCDIR.tar.gz $DOCDIR)
+
+curl \
+  -X PUT \
+  -H 'Content-Type: application/x-tar' \
+  -H 'Content-Encoding: gzip' \
+  -u $HACKAGEUSER \
+  --data-binary "@$TEMPDIR/$DOCDIR.tar.gz" \
+  "https://hackage.haskell.org/package/$PACKAGENAME-$PACKAGEVER/docs"
