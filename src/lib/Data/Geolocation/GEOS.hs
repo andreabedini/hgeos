@@ -16,10 +16,10 @@ For the low-level FFI bindings, see "Data.Geolocation.GEOS.Imports".
 {-# LANGUAGE RecordWildCards #-}
 
 module Data.Geolocation.GEOS
-    ( Context()
-    , Geometry()
-    , Reader()
-    , Writer()
+    ( Context ()
+    , Geometry ()
+    , Reader ()
+    , Writer ()
     , intersection
     , mkReader
     , mkWriter
