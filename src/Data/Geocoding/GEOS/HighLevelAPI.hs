@@ -10,8 +10,8 @@ module Data.Geocoding.GEOS.HighLevelAPI
     ) where
 
 import Control.Exception
-import Data.IORef
 import Data.Geocoding.GEOS.LowLevelImports
+import Data.IORef
 import Foreign.C
 
 data ContextState = ContextState
@@ -72,9 +72,10 @@ readGeometry (Reader sr hReader) str = withCString str $ \cs -> do
 writeGeometry :: Writer -> Geometry -> IO String
 writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
     ContextState{..} <- readIORef sr
-    cs <- c_GEOSWKTWriter_write_r hCtx hWriter hGeometry
-    str <- peekCString cs
-    c_GEOSFree_r_CChar hCtx cs
+    str <- bracket
+        (c_GEOSWKTWriter_write_r hCtx hWriter hGeometry)
+        (c_GEOSFree_r_CChar hCtx)
+        peekCString
     return str
 
 intersection :: Geometry -> Geometry -> IO Geometry
