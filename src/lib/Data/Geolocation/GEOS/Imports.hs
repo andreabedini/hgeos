@@ -15,7 +15,24 @@ high-level wrappers do not yet exist.
 For the high-level API, see "Data.Geolocation.GEOS".
 -}
 
-module Data.Geolocation.GEOS.Imports where
+module Data.Geolocation.GEOS.Imports
+    ( GEOSContextHandle_t ()
+    , GEOSGeometryPtr ()
+    , GEOSWKTReaderPtr ()
+    , GEOSWKTWriterPtr ()
+    , c_GEOSFree_r_CChar
+    , c_GEOSGeom_destroy_r
+    , c_GEOSIntersection_r
+    , c_GEOSWKTReader_create_r
+    , c_GEOSWKTReader_destroy_r
+    , c_GEOSWKTReader_read_r
+    , c_GEOSWKTWriter_create_r
+    , c_GEOSWKTWriter_destroy_r
+    , c_GEOSWKTWriter_write_r
+    , c_GEOSversion
+    , c_initializeGEOSWithHandlers
+    , c_uninitializeGEOS
+    ) where
 
 import Foreign.C
 import Foreign.Ptr
