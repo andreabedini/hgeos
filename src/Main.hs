@@ -2,9 +2,11 @@
 
 module Main (main) where
 
+import Control.Exception
 import Data.Geocoding.GEOS
-import Data.Geocoding.GEOS.LowLevelAPI
+import Data.Geocoding.GEOS.LowLevelImports
 import Foreign.C
+import Foreign.Ptr
 
 lowLevelAPIDemo :: IO ()
 lowLevelAPIDemo = do
@@ -27,6 +29,15 @@ lowLevelAPIDemo = do
         c_GEOSGeom_destroy_r h g1 -- TODO: Use bracket
         c_GEOSGeom_destroy_r h g0 -- TODO: Use bracket
         putStrLn "lowLevelAPIDemo done"
+    where
+        withGEOS :: (GEOSContextHandle_t -> IO a) -> IO a
+        withGEOS = bracket c_initializeGEOSWithHandlers c_uninitializeGEOS
+        withWKTReader :: GEOSContextHandle_t -> (GEOSWKTReaderPtr -> IO a) -> IO a
+        withWKTReader h = bracket (c_GEOSWKTReader_create_r h) (c_GEOSWKTReader_destroy_r h)
+        withWKTWriter :: GEOSContextHandle_t -> (GEOSWKTWriterPtr -> IO a) -> IO a
+        withWKTWriter h = bracket (c_GEOSWKTWriter_create_r h) (c_GEOSWKTWriter_destroy_r h)
+        wrap :: GEOSGeometryPtr -> Maybe GEOSGeometryPtr
+        wrap g@(GEOSGeometryPtr p) = if p == nullPtr then Nothing else Just g
 
 highLevelAPIDemo :: IO ()
 highLevelAPIDemo = do
