@@ -1,10 +1,7 @@
 #include "helpers.h"
-#include <assert.h>
 #include <geos_c.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 //#define TRACE(message) printf(message "\n")
 #define TRACE(message) do {} while (0)
