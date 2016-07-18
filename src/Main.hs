@@ -14,19 +14,16 @@ lowLevelAPIDemo = do
 
     withGEOS $ \ctx -> do
         withWKTReader ctx $ \reader -> do
-            g0 <- c_GEOSWKTReader_read_r ctx reader wkt0
-            g1 <- c_GEOSWKTReader_read_r ctx reader wkt1
-            g2 <- c_GEOSIntersection_r ctx g0 g1
-            withWKTWriter ctx $ \writer -> do
-                str <- bracket
-                    (c_GEOSWKTWriter_write_r ctx writer g2)
-                    (c_GEOSFree_r_CChar ctx)
-                    peekCString
-                print str
-                c_GEOSGeom_destroy_r ctx g2 -- TODO: Use bracket
-                c_GEOSGeom_destroy_r ctx g1 -- TODO: Use bracket
-                c_GEOSGeom_destroy_r ctx g0 -- TODO: Use bracket
-                putStrLn "lowLevelAPIDemo done"
+            withGeometry ctx reader wkt0 $ \g0 -> do
+                withGeometry ctx reader wkt1 $ \g1 -> do
+                    bracket (c_GEOSIntersection_r ctx g0 g1) (c_GEOSGeom_destroy_r ctx) $ \g2 -> do
+                        withWKTWriter ctx $ \writer -> do
+                            str <- bracket
+                                (c_GEOSWKTWriter_write_r ctx writer g2)
+                                (c_GEOSFree_r_CChar ctx)
+                                peekCString
+                            putStrLn str
+                            putStrLn "lowLevelAPIDemo done"
     where
         withGEOS :: (GEOSContextHandle_t -> IO a) -> IO a
         withGEOS = bracket c_initializeGEOSWithHandlers c_uninitializeGEOS
@@ -34,6 +31,11 @@ lowLevelAPIDemo = do
         withWKTReader ctx = bracket (c_GEOSWKTReader_create_r ctx) (c_GEOSWKTReader_destroy_r ctx)
         withWKTWriter :: GEOSContextHandle_t -> (GEOSWKTWriterPtr -> IO a) -> IO a
         withWKTWriter ctx = bracket (c_GEOSWKTWriter_create_r ctx) (c_GEOSWKTWriter_destroy_r ctx)
+        withGeometry :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> CString -> (GEOSGeometryPtr -> IO a) -> IO a
+        withGeometry ctx reader wkt =
+            bracket
+                (c_GEOSWKTReader_read_r ctx reader wkt)
+                (c_GEOSGeom_destroy_r ctx)
 
 -- Demonstrates use of high-level API
 highLevelAPIDemo :: IO ()
