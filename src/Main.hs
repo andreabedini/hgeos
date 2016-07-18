@@ -8,6 +8,7 @@ import Data.Geocoding.GEOS.LowLevelImports
 import Foreign.C
 import Foreign.Ptr
 
+-- Demonstrates direct use of imports
 lowLevelAPIDemo :: IO ()
 lowLevelAPIDemo = do
     wkt0 <- newCString "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
@@ -39,6 +40,7 @@ lowLevelAPIDemo = do
         wrap :: GEOSGeometryPtr -> Maybe GEOSGeometryPtr
         wrap g@(GEOSGeometryPtr p) = if p == nullPtr then Nothing else Just g
 
+-- Demonstrates use of high-level API
 highLevelAPIDemo :: IO ()
 highLevelAPIDemo = do
     withContext $ \ctx -> do
