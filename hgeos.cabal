@@ -27,6 +27,9 @@ executable hgeos
   cc-options:         -std=c99 -pthread
   other-modules:      Data.Geocoding.GEOS
                     , Data.Geocoding.GEOS.Imports
+  if os(windows)
+    include-dirs:     C:/OSGeo4W64/include
+    extra-lib-dirs:   C:/OSGeo4W64/lib
 
 test-suite doctests
   type:               exitcode-stdio-1.0
