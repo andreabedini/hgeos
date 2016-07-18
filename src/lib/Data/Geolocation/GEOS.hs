@@ -1,5 +1,5 @@
 {-|
-Module      : Data.Geocoding.GEOS
+Module      : Data.Geolocation.GEOS
 Description : High-level API for interoperating with GEOS C API
 Copyright   : (C) Richard Cook, 2016
 Licence     : MIT
@@ -10,12 +10,12 @@ Portability : POSIX
 A high-level API for interoperating with GEOS C API which includes automatic
 management of lifetimes of objects such as readers, writers and geometries.
 
-For the low-level FFI bindings, see "Data.Gecoding.GEOS.Imports".
+For the low-level FFI bindings, see "Data.Geolocation.GEOS.Imports".
 -}
 
 {-# LANGUAGE RecordWildCards #-}
 
-module Data.Geocoding.GEOS
+module Data.Geolocation.GEOS
     ( Context()
     , Geometry()
     , Reader()
@@ -29,7 +29,7 @@ module Data.Geocoding.GEOS
     ) where
 
 import Control.Exception
-import Data.Geocoding.GEOS.Imports
+import Data.Geolocation.GEOS.Imports
 import Data.IORef
 import Foreign.C
 

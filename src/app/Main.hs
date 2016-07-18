@@ -1,8 +1,8 @@
 module Main (main) where
 
 import Control.Exception
-import Data.Geocoding.GEOS
-import Data.Geocoding.GEOS.Imports
+import Data.Geolocation.GEOS
+import Data.Geolocation.GEOS.Imports
 import Foreign.C
 import Foreign.Ptr
 

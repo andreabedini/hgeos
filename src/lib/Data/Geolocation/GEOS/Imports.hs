@@ -1,5 +1,5 @@
 {-|
-Module      : Data.Geocoding.GEOS.Imports
+Module      : Data.Geolocation.GEOS.Imports
 Description : FFI bindings for GEOS C API
 Copyright   : (C) Richard Cook, 2016
 Licence     : MIT
@@ -12,10 +12,10 @@ These are low-level FFI bindings for the GEOS C API derived from
 low-level access to the native functions for parts of the C API for which
 high-level wrappers do not yet exist.
 
-For the high-level API, see "Data.Gecoding.GEOS".
+For the high-level API, see "Data.Geolocation.GEOS".
 -}
 
-module Data.Geocoding.GEOS.Imports where
+module Data.Geolocation.GEOS.Imports where
 
 import Foreign.C
 import Foreign.Ptr

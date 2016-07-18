@@ -24,8 +24,8 @@ library
   c-sources:          src/lib/helpers.c
   includes:           src/lib/helpers.h
   cc-options:         -std=c99 -pthread
-  exposed-modules:    Data.Geocoding.GEOS
-                    , Data.Geocoding.GEOS.Imports
+  exposed-modules:    Data.Geolocation.GEOS
+                    , Data.Geolocation.GEOS.Imports
   if os(windows)
     include-dirs:     C:/OSGeo4W64/include
     extra-lib-dirs:   C:/OSGeo4W64/lib
