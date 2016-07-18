@@ -2,7 +2,7 @@
 
 module Main (main) where
 
-import Data.Geocoding.GEOS.HighLevelAPI
+import Data.Geocoding.GEOS
 import Data.Geocoding.GEOS.LowLevelAPI
 import Foreign.C
 

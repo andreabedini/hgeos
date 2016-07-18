@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Data.Geocoding.GEOS.HighLevelAPI
+module Data.Geocoding.GEOS
     ( intersection
     , mkReader
     , mkWriter
