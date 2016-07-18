@@ -10,7 +10,7 @@ module Data.Geocoding.GEOS
     ) where
 
 import Control.Exception
-import Data.Geocoding.GEOS.LowLevelImports
+import Data.Geocoding.GEOS.Imports
 import Data.IORef
 import Foreign.C
 
