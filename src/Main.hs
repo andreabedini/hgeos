@@ -14,9 +14,9 @@ lowLevelAPIDemo = do
 
     withGEOS $ \ctx -> do
         withWKTReader ctx $ \reader -> do
-            (Just g0) <- wrap <$> c_GEOSWKTReader_read_r ctx reader wkt0
-            (Just g1) <- wrap <$> c_GEOSWKTReader_read_r ctx reader wkt1
-            (Just g2) <- wrap <$> c_GEOSIntersection_r ctx g0 g1
+            g0 <- c_GEOSWKTReader_read_r ctx reader wkt0
+            g1 <- c_GEOSWKTReader_read_r ctx reader wkt1
+            g2 <- c_GEOSIntersection_r ctx g0 g1
             withWKTWriter ctx $ \writer -> do
                 str <- bracket
                     (c_GEOSWKTWriter_write_r ctx writer g2)
@@ -31,11 +31,9 @@ lowLevelAPIDemo = do
         withGEOS :: (GEOSContextHandle_t -> IO a) -> IO a
         withGEOS = bracket c_initializeGEOSWithHandlers c_uninitializeGEOS
         withWKTReader :: GEOSContextHandle_t -> (GEOSWKTReaderPtr -> IO a) -> IO a
-        withWKTReader h = bracket (c_GEOSWKTReader_create_r h) (c_GEOSWKTReader_destroy_r h)
+        withWKTReader ctx = bracket (c_GEOSWKTReader_create_r ctx) (c_GEOSWKTReader_destroy_r ctx)
         withWKTWriter :: GEOSContextHandle_t -> (GEOSWKTWriterPtr -> IO a) -> IO a
-        withWKTWriter h = bracket (c_GEOSWKTWriter_create_r h) (c_GEOSWKTWriter_destroy_r h)
-        wrap :: GEOSGeometryPtr -> Maybe GEOSGeometryPtr
-        wrap g@(GEOSGeometryPtr p) = if p == nullPtr then Nothing else Just g
+        withWKTWriter ctx = bracket (c_GEOSWKTWriter_create_r ctx) (c_GEOSWKTWriter_destroy_r ctx)
 
 -- Demonstrates use of high-level API
 highLevelAPIDemo :: IO ()
