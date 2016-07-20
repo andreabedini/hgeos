@@ -22,6 +22,7 @@ library
   build-depends:      base >= 4.7 && < 5
   extra-libraries:    geos_c
   c-sources:          src/lib/helpers.c
+                    , src/lib/helpers.h
   includes:           src/lib/helpers.h
   cc-options:         -std=c99 -pthread
   exposed-modules:    Data.Geolocation.GEOS
