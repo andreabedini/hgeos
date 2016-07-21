@@ -1,8 +1,7 @@
 # hgeos
 
-Simple Haskell bindings to the [GEOS][geos] [C API][capi]
-
-Heavily inspired by [Django GEOS bindings][django-gis]
+Simple Haskell bindings to the [GEOS][geos] [C API][capi] heavily inspired by
+[Django GEOS bindings][django-gis]
 
 Documentation is available on [Hackage][hackage]:
 
