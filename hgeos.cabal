@@ -5,6 +5,7 @@ description:
   Simple Haskell bindings to the GEOS C API heavily inspired by
   <https://github.com/django/django/tree/master/django/contrib/gis/geos Django GEOS bindings>
 homepage:             https://github.com/rcook/hgeos#readme
+bug-reports:          https://github.com/rcook/hgeos/issues
 license:              MIT
 license-file:         LICENSE
 author:               Richard Cook
