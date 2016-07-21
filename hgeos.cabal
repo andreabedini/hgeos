@@ -8,9 +8,9 @@ homepage:             https://github.com/rcook/hgeos#readme
 bug-reports:          https://github.com/rcook/hgeos/issues
 license:              MIT
 license-file:         LICENSE
-author:               Richard Cook
-maintainer:           rcook@rcook.org
-copyright:            2016 Richard Cook
+author:               Richard Cook <rcook@rcook.org>
+maintainer:           Richard Cook <rcook@rcook.org>
+copyright:            (C) 2016 Richard Cook
 category:             Data, Geography, Geometry, Text
 build-type:           Simple
 cabal-version:        >= 1.10
