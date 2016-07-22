@@ -17,12 +17,15 @@ For the high-level API, see "Data.Geolocation.GEOS".
 
 module Data.Geolocation.GEOS.Imports
     ( GEOSContextHandle_t ()
+    , GEOSCoordSequencePtr ()
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
     , GEOSWKTWriterPtr ()
     , c_GEOSEnvelope_r
     , c_GEOSFree_r_CString
+    , c_GEOSCoordSeq_destroy_r
     , c_GEOSGeom_destroy_r
+    , c_GEOSGeom_getCoordSeq_r
     , c_GEOSGetExteriorRing_r
     , c_GEOSIntersection_r
     , c_GEOSWKTReader_create_r
@@ -41,6 +44,9 @@ import Foreign.Ptr
 
 -- |Wraps @GEOSContextHandle_t@
 newtype GEOSContextHandle_t = GEOSContextHandle_t (Ptr GEOSContextHandle_t)
+
+-- |Wraps @GEOSCoordSequence*@
+newtype GEOSCoordSequencePtr = GEOSCoordSequencePtr (Ptr GEOSCoordSequencePtr)
 
 -- |Wraps @GEOSGeometry*@
 newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr)
@@ -78,6 +84,14 @@ foreign import ccall "helpers.h getErrorMessage"
 -- |Wraps @GEOSGeom_destroy_r@
 foreign import ccall "GEOSGeom_destroy_r"
     c_GEOSGeom_destroy_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO ()
+
+-- |Wraps @GEOSGeom_getCoordSeq_r@
+foreign import ccall "GEOSGeom_getCoordSeq_r"
+    c_GEOSGeom_getCoordSeq_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSCoordSequencePtr
+
+-- |Wraps @GEOSCoordSeq_destroy_r@
+foreign import ccall "GEOSCoordSeq_destroy_r"
+    c_GEOSCoordSeq_destroy_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> IO ()
 
 -- |Wraps @GEOSWKTReader_create_r@
 foreign import ccall "GEOSWKTReader_create_r"

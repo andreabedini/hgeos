@@ -79,5 +79,6 @@ namibiaDemo = do
         country <- readGeometry reader wkt
         env <- envelope country
         shell <- exteriorRing env
+        coordSeq <- coordinateSequence shell
         p shell
         return ()

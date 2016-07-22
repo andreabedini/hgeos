@@ -20,6 +20,7 @@ module Data.Geolocation.GEOS
     , Geometry ()
     , Reader ()
     , Writer ()
+    , coordinateSequence
     , envelope
     , exteriorRing
     , intersection
@@ -40,6 +41,7 @@ data ContextState = ContextState
     , hReaders :: [GEOSWKTReaderPtr]
     , hWriters :: [GEOSWKTWriterPtr]
     , hGeometries :: [GEOSGeometryPtr]
+    , hCoordinateSequences :: [GEOSCoordSequencePtr]
     }
 
 type ContextStateRef = IORef ContextState
@@ -56,15 +58,18 @@ data Writer = Writer ContextStateRef GEOSWKTWriterPtr
 -- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry
 data Geometry = Geometry ContextStateRef GEOSGeometryPtr
 
+data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
+
 mkContext :: IO Context
 mkContext = do
     hCtx <- c_initializeGEOSWithHandlers
-    sr <- newIORef $ ContextState hCtx [] [] []
+    sr <- newIORef $ ContextState hCtx [] [] [] []
     return $ Context sr
 
 releaseContext :: Context -> IO ()
 releaseContext (Context sr) = do
     ContextState{..} <- readIORef sr
+    mapM_ (c_GEOSCoordSeq_destroy_r hCtx) hCoordinateSequences
     mapM_ (c_GEOSGeom_destroy_r hCtx) hGeometries
     mapM_ (c_GEOSWKTWriter_destroy_r hCtx) hWriters
     mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
@@ -241,3 +246,12 @@ exteriorRing (Geometry sr h) =
 intersection :: Geometry -> Geometry -> IO Geometry
 intersection (Geometry sr0 h0) (Geometry sr1 h1) =
     track sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
+
+-- |Returns a coordinate sequence from a geometry
+coordinateSequence :: Geometry -> IO CoordinateSequence
+coordinateSequence (Geometry sr hGeometry) = do
+    ContextState{..} <- readIORef sr
+    h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
+    -- Do not track
+    --modifyIORef' sr (\p@ContextState{..} -> p { hCoordinateSequences = h : hCoordinateSequences })
+    return $ CoordinateSequence sr h
