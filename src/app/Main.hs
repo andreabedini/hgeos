@@ -6,9 +6,11 @@ import Control.Exception
 import Control.Monad
 import Data.Geolocation.GEOS
 import Data.Geolocation.GEOS.Imports
+import Data.List
 import Foreign.C
 import Foreign.Ptr
 import Paths_hgeos
+import Text.Printf
 
 -- Demonstrates direct use of imports
 -- Lifetimes of various GEOS objects, including readers, writers and
@@ -109,6 +111,27 @@ extent ((x, y, z) : cs) =
 mfloor :: Double -> Double -> Double
 mfloor m x = (fromInteger $ floor (x / m)) * m
 
+frange :: Double -> Double -> Double -> [Double]
+frange lower upper step =
+    let count = (upper - lower) / step
+    in [lower + (fromIntegral i) * step | i <- [0..(round count - 1)]]
+
+type Longitude = Double
+type Latitude = Double
+type Resolution = Double
+
+mkSquare :: Reader -> Longitude -> Latitude -> Resolution -> IO Geometry
+mkSquare reader longitude latitude resolution =
+    let points = [
+            (longitude, latitude),
+            (longitude + resolution, latitude),
+            (longitude + resolution, latitude + resolution),
+            (longitude, latitude + resolution),
+            (longitude, latitude)
+            ]
+        wkt = printf "POLYGON ((%s))" (intercalate "," (map (\(a, b) -> printf "%f %f" a b) points))
+    in readGeometry reader wkt
+
 resolution :: Double
 resolution = 1.0
 
@@ -137,4 +160,10 @@ namibiaDemo = do
         print longitudeEnd
         print latitudeBegin
         print latitudeEnd
+        let longitudes = frange longitudeBegin longitudeEnd 1.0
+            latitudes = frange latitudeBegin latitudeEnd 1.0
+        forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
+            square <- mkSquare reader longitude latitude resolution
+            wkt <- writeGeometry writer square
+            print wkt
     putStrLn "namibiaDemo done"
