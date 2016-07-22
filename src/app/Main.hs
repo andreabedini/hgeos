@@ -68,7 +68,9 @@ main = do
 printGeometry :: Writer -> Geometry -> IO ()
 printGeometry r g = writeGeometry r g >>= putStrLn
 
-getXYZs :: CoordinateSequence -> IO (Maybe [(Double, Double, Double)])
+type Coordinate = (Double, Double, Double)
+
+getXYZs :: CoordinateSequence -> IO (Maybe [Coordinate])
 getXYZs coordSeq = do
     maybeSize <- getSize coordSeq
     case maybeSize of
@@ -80,6 +82,27 @@ getXYZs coordSeq = do
                  (Just z) <- getZ coordSeq i
                  return (x, y, z)
              return $ Just xyzs
+
+data Extent = Extent
+    { minX :: Double
+    , maxX :: Double
+    , minY :: Double
+    , maxY :: Double
+    , minZ :: Double
+    , maxZ :: Double
+    } deriving Show
+
+extent :: [Coordinate] -> Extent
+extent ((x, y, z) : cs) =
+    let (minX, maxX, minY, maxY, minZ, maxZ) =
+            foldr (\(x', y', z') (minX, maxX, minY, maxY, minZ, maxZ) ->
+                   (if x' < minX then x' else minX,
+                    if x' > maxX then x' else maxX,
+                    if y' < minY then y' else minY,
+                    if y' > maxY then y' else maxY,
+                    if z' < minZ then z' else minZ,
+                    if z' > maxX then z' else maxZ)) (x, x, y, y, z, z) cs
+    in Extent minX maxX minY maxY minZ maxZ
 
 namibiaDemo :: IO ()
 namibiaDemo = do
@@ -96,4 +119,5 @@ namibiaDemo = do
         coordSeq <- coordinateSequence shell
         (Just xyzs) <- getXYZs coordSeq
         forM_ xyzs $ \(x, y, z) -> print (x, y, z)
+        print $ extent xyzs
     putStrLn "namibiaDemo done"
