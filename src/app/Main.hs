@@ -68,6 +68,19 @@ main = do
 printGeometry :: Writer -> Geometry -> IO ()
 printGeometry r g = writeGeometry r g >>= putStrLn
 
+getXYZs :: CoordinateSequence -> IO (Maybe [(Double, Double, Double)])
+getXYZs coordSeq = do
+    maybeSize <- getSize coordSeq
+    case maybeSize of
+         Nothing -> return Nothing
+         Just size -> do
+             xyzs <- forM [0..(size - 1)] $ \i -> do
+                 (Just x) <- getX coordSeq i
+                 (Just y) <- getY coordSeq i
+                 (Just z) <- getZ coordSeq i
+                 return (x, y, z)
+             return $ Just xyzs
+
 namibiaDemo :: IO ()
 namibiaDemo = do
     fileName <- getDataFileName "data/namibia.wkt"
@@ -81,10 +94,6 @@ namibiaDemo = do
         env <- envelope country
         shell <- exteriorRing env
         coordSeq <- coordinateSequence shell
-        (Just size) <- getSize coordSeq
-        forM_ [0..(size - 1)] $ \i -> do
-            (Just x) <- getX coordSeq i
-            (Just y) <- getY coordSeq i
-            (Just z) <- getZ coordSeq i
-            print (x, y, z)
+        (Just xyzs) <- getXYZs coordSeq
+        forM_ xyzs $ \(x, y, z) -> print (x, y, z)
     putStrLn "namibiaDemo done"
