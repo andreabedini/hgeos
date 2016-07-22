@@ -89,14 +89,6 @@ foreign import ccall "GEOSEnvelope_r"
 foreign import ccall "GEOSFree_r"
     c_GEOSFree_r_CString :: GEOSContextHandle_t -> CString -> IO ()
 
--- |Wraps @GEOSGetExteriorRing_r@
-foreign import ccall "GEOSGetExteriorRing_r"
-    c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
-
--- |Wraps @GEOSIntersection_r@
-foreign import ccall "GEOSIntersection_r"
-    c_GEOSIntersection_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
-
 -- |Wraps @GEOSGeom_destroy_r@
 foreign import ccall "GEOSGeom_destroy_r"
     c_GEOSGeom_destroy_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO ()
@@ -104,6 +96,14 @@ foreign import ccall "GEOSGeom_destroy_r"
 -- |Wraps @GEOSGeom_getCoordSeq_r@
 foreign import ccall "GEOSGeom_getCoordSeq_r"
     c_GEOSGeom_getCoordSeq_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSCoordSequencePtr
+
+-- |Wraps @GEOSGetExteriorRing_r@
+foreign import ccall "GEOSGetExteriorRing_r"
+    c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+
+-- |Wraps @GEOSIntersection_r@
+foreign import ccall "GEOSIntersection_r"
+    c_GEOSIntersection_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSWKTReader_create_r@
 foreign import ccall "GEOSWKTReader_create_r"
