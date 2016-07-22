@@ -68,6 +68,13 @@ releaseContext (Context sr) = do
     mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
     c_uninitializeGEOS hCtx
 
+track :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
+track sr f = do
+    ContextState{..} <- readIORef sr
+    hGeometry <- f hCtx
+    modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = hGeometry : hGeometries })
+    return $ Geometry sr hGeometry
+
 -- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
 -- and releases the context and all associated objects such as readers, writers
 -- and geometries at the end:
@@ -141,10 +148,7 @@ mkWriter (Context sr) = do
 -- is released.
 readGeometry :: Reader -> String -> IO Geometry
 readGeometry (Reader sr hReader) str = withCString str $ \cs -> do
-    ContextState{..} <- readIORef sr
-    hGeometry <- c_GEOSWKTReader_read_r hCtx hReader cs
-    modifyIORef' sr (\p@ContextState{..} -> p { hGeometries = hGeometry : hGeometries })
-    return $ Geometry sr hGeometry
+    track sr (\hCtx -> c_GEOSWKTReader_read_r hCtx hReader cs)
 
 -- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
 --
@@ -191,7 +195,5 @@ writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
 -- The geometry is associated with the 'Context' and released when the 'Context'
 -- is released.
 intersection :: Geometry -> Geometry -> IO Geometry
-intersection (Geometry sr0 hGeometry0) (Geometry sr1 hGeometry1) = do
-    ContextState{..} <- readIORef sr0
-    hGeometry <- c_GEOSIntersection_r hCtx hGeometry0 hGeometry1
-    return $ Geometry sr0 hGeometry
+intersection (Geometry sr0 hGeometry0) (Geometry sr1 hGeometry1) =
+    track sr0 (\hCtx -> c_GEOSIntersection_r hCtx hGeometry0 hGeometry1)
