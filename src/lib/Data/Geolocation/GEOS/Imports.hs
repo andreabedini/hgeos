@@ -39,6 +39,7 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSWKTWriter_create_r
     , c_GEOSWKTWriter_destroy_r
     , c_GEOSWKTWriter_write_r
+    , c_GEOSisEmpty_r
     , c_GEOSversion
     , c_finishGEOS_r
     , c_initializeGEOSWithHandlers
@@ -133,6 +134,10 @@ foreign import ccall "GEOSWKTWriter_destroy_r"
 -- |Wraps @GEOSWKTWriter_write_r@
 foreign import ccall "GEOSWKTWriter_write_r"
     c_GEOSWKTWriter_write_r :: GEOSContextHandle_t -> GEOSWKTWriterPtr -> GEOSGeometryPtr -> IO CString
+
+-- |Wraps @GEOSisEmpty_r@
+foreign import ccall "GEOSisEmpty_r"
+    c_GEOSisEmpty_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO CChar
 
 -- |Wraps @GEOSversion@
 foreign import ccall "GEOSversion"

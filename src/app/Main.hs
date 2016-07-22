@@ -165,8 +165,10 @@ namibiaDemo = do
         forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
             square <- mkSquare reader longitude latitude resolution
             overlap <- intersection square country
-            id <- geometryTypeId overlap
-            print id
+            x <- isEmpty overlap
+            unless x $ do
+                id <- geometryTypeId overlap
+                print id
             --wkt <- writeGeometry writer overlap
             --print wkt
     putStrLn "namibiaDemo done"
