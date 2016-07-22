@@ -24,6 +24,7 @@ module Data.Geolocation.GEOS
     , coordinateSequence
     , envelope
     , exteriorRing
+    , geometryTypeId
     , getSize
     , getX
     , getY
@@ -61,6 +62,17 @@ type ContextStateRef = IORef ContextState
 -- |References a <https://trac.osgeo.org/geos/ GEOS> coordinate sequence
 data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
 
+-- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry type ID
+data GeometryTypeId =
+    Point |
+    LineString |
+    LinearRing |
+    Polygon |
+    MultiPoint |
+    MultlLineString |
+    MultiPolygon |
+    GeometryCollection deriving (Enum, Show)
+
 -- |References a <https://en.wikipedia.org/wiki/Well-known_text WKT> reader
 data Reader = Reader ContextStateRef GEOSWKTReaderPtr
 
@@ -96,6 +108,13 @@ envelope (Geometry sr h) =
 exteriorRing :: Geometry -> IO Geometry
 exteriorRing (Geometry sr h) =
     doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
+
+-- |Returns type ID of a 'Geometry' instance
+geometryTypeId :: Geometry -> IO GeometryTypeId
+geometryTypeId (Geometry sr h) = do
+    ContextState{..} <- readIORef sr
+    value <- c_GEOSGeomTypeId_r hCtx h
+    return $ toEnum (fromIntegral value)
 
 getOrdinate :: (GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
     CoordinateSequence -> Word -> IO (Maybe Double)
