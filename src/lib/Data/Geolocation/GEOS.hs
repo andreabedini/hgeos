@@ -36,6 +36,9 @@ import Data.Geolocation.GEOS.Imports
 import Data.IORef
 import Foreign.C
 
+-- |Represents a <https://trac.osgeo.org/geos/ GEOS> context
+data Context = Context ContextStateRef
+
 data ContextState = ContextState
     { hCtx :: GEOSContextHandle_t
     , hReaders :: [GEOSWKTReaderPtr]
@@ -46,8 +49,7 @@ data ContextState = ContextState
 
 type ContextStateRef = IORef ContextState
 
--- |Represents a <https://trac.osgeo.org/geos/ GEOS> context
-data Context = Context ContextStateRef
+data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
 
 -- |Represents a <https://en.wikipedia.org/wiki/Well-known_text WKT> reader
 data Reader = Reader ContextStateRef GEOSWKTReaderPtr
@@ -58,136 +60,20 @@ data Writer = Writer ContextStateRef GEOSWKTWriterPtr
 -- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry
 data Geometry = Geometry ContextStateRef GEOSGeometryPtr
 
-data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
-
-mkContext :: IO Context
-mkContext = do
-    hCtx <- c_initializeGEOSWithHandlers
-    sr <- newIORef $ ContextState hCtx [] [] [] []
-    return $ Context sr
-
-releaseContext :: Context -> IO ()
-releaseContext (Context sr) = do
+-- |Returns a coordinate sequence from a geometry
+coordinateSequence :: Geometry -> IO CoordinateSequence
+coordinateSequence (Geometry sr hGeometry) = do
     ContextState{..} <- readIORef sr
-    mapM_ (c_GEOSCoordSeq_destroy_r hCtx) hCoordinateSequences
-    mapM_ (c_GEOSGeom_destroy_r hCtx) hGeometries
-    mapM_ (c_GEOSWKTWriter_destroy_r hCtx) hWriters
-    mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
-    c_uninitializeGEOS hCtx
-
-track :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
-track sr f = do
-    ContextState{..} <- readIORef sr
-    h <- f hCtx
-    modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
-    return $ Geometry sr h
+    h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
+    -- Do not track
+    --modifyIORef' sr (\p@ContextState{..} -> p { hCoordinateSequences = h : hCoordinateSequences })
+    return $ CoordinateSequence sr h
 
 doNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
 doNotTrack sr f = do
     ContextState{..} <- readIORef sr
     h <- f hCtx
     return $ Geometry sr h
-
--- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
--- and releases the context and all associated objects such as readers, writers
--- and geometries at the end:
---
--- @
---    withContext $ \ctx -> do
---
---        -- Use context
---
---        return ()
--- @
-withContext :: (Context -> IO a) -> IO a
-withContext = bracket mkContext releaseContext
-
--- |Creates a reader used to deserialize 'Geometry' instances from
--- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
---
--- @
---    withContext $ \ctx -> do
---        reader <- mkReader ctx
---
---        -- Use reader
---
---        return ()
--- @
---
--- The reader is associated with the 'Context' and released when the 'Context'
--- is released.
-mkReader :: Context -> IO Reader
-mkReader (Context sr) = do
-    ContextState{..} <- readIORef sr
-    h <- c_GEOSWKTReader_create_r hCtx
-    modifyIORef' sr (\p@ContextState{..} -> p { hReaders = h : hReaders })
-    return $ Reader sr h
-
--- |Creates a writer used to serialize 'Geometry' instances to
--- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
---
--- @
---    withContext $ \ctx -> do
---        writer <- mkWriter ctx
---
---        -- Use writer
---
---        return ()
--- @
---
--- The writer is associated with the 'Context' and released when the 'Context'
--- is released.
-mkWriter :: Context -> IO Writer
-mkWriter (Context sr) = do
-    ContextState{..} <- readIORef sr
-    h <- c_GEOSWKTWriter_create_r hCtx
-    modifyIORef' sr (\p@ContextState{..} -> p { hWriters = h : hWriters })
-    return $ Writer sr h
-
--- |Deserializes a 'Geometry' instance from the given 'String' using the
--- supplied 'Reader':
---
--- @
---    withContext $ \ctx -> do
---        reader <- mkReader ctx
---        geometry <- readGeometry read "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
---
---        -- Use geometry
---
---        return ()
--- @
---
--- The geometry is associated with the 'Context' and released when the 'Context'
--- is released.
-readGeometry :: Reader -> String -> IO Geometry
-readGeometry (Reader sr h) str = withCString str $ \cs -> do
-    track sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
-
--- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
---
--- @
---    withContext $ \ctx -> do
---        reader <- mkReader ctx
---        geometry <- readGeometry read "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
---
---        writer <- mkWriter ctx
---        str <- writeGeometry writer geometry
---
---        -- Use string
---
---        return ()
--- @
---
--- The geometry is associated with the 'Context' and released when the 'Context'
--- is released.
-writeGeometry :: Writer -> Geometry -> IO String
-writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
-    ContextState{..} <- readIORef sr
-    str <- bracket
-        (c_GEOSWKTWriter_write_r hCtx hWriter hGeometry)
-        (c_GEOSFree_r_CString hCtx)
-        peekCString
-    return str
 
 -- |Returns the 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry' instance:
@@ -247,11 +133,126 @@ intersection :: Geometry -> Geometry -> IO Geometry
 intersection (Geometry sr0 h0) (Geometry sr1 h1) =
     track sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
 
--- |Returns a coordinate sequence from a geometry
-coordinateSequence :: Geometry -> IO CoordinateSequence
-coordinateSequence (Geometry sr hGeometry) = do
+mkContext :: IO Context
+mkContext = do
+    hCtx <- c_initializeGEOSWithHandlers
+    sr <- newIORef $ ContextState hCtx [] [] [] []
+    return $ Context sr
+
+-- |Creates a reader used to deserialize 'Geometry' instances from
+-- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
+--
+-- @
+--    withContext $ \ctx -> do
+--        reader <- mkReader ctx
+--
+--        -- Use reader
+--
+--        return ()
+-- @
+--
+-- The reader is associated with the 'Context' and released when the 'Context'
+-- is released.
+mkReader :: Context -> IO Reader
+mkReader (Context sr) = do
     ContextState{..} <- readIORef sr
-    h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
-    -- Do not track
-    --modifyIORef' sr (\p@ContextState{..} -> p { hCoordinateSequences = h : hCoordinateSequences })
-    return $ CoordinateSequence sr h
+    h <- c_GEOSWKTReader_create_r hCtx
+    modifyIORef' sr (\p@ContextState{..} -> p { hReaders = h : hReaders })
+    return $ Reader sr h
+
+-- |Creates a writer used to serialize 'Geometry' instances to
+-- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
+--
+-- @
+--    withContext $ \ctx -> do
+--        writer <- mkWriter ctx
+--
+--        -- Use writer
+--
+--        return ()
+-- @
+--
+-- The writer is associated with the 'Context' and released when the 'Context'
+-- is released.
+mkWriter :: Context -> IO Writer
+mkWriter (Context sr) = do
+    ContextState{..} <- readIORef sr
+    h <- c_GEOSWKTWriter_create_r hCtx
+    modifyIORef' sr (\p@ContextState{..} -> p { hWriters = h : hWriters })
+    return $ Writer sr h
+
+-- |Deserializes a 'Geometry' instance from the given 'String' using the
+-- supplied 'Reader':
+--
+-- @
+--    withContext $ \ctx -> do
+--        reader <- mkReader ctx
+--        geometry <- readGeometry read "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
+--
+--        -- Use geometry
+--
+--        return ()
+-- @
+--
+-- The geometry is associated with the 'Context' and released when the 'Context'
+-- is released.
+
+readGeometry :: Reader -> String -> IO Geometry
+readGeometry (Reader sr h) str = withCString str $ \cs -> do
+    track sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
+
+releaseContext :: Context -> IO ()
+releaseContext (Context sr) = do
+    ContextState{..} <- readIORef sr
+    mapM_ (c_GEOSCoordSeq_destroy_r hCtx) hCoordinateSequences
+    mapM_ (c_GEOSGeom_destroy_r hCtx) hGeometries
+    mapM_ (c_GEOSWKTWriter_destroy_r hCtx) hWriters
+    mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
+    c_uninitializeGEOS hCtx
+
+track :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
+track sr f = do
+    ContextState{..} <- readIORef sr
+    h <- f hCtx
+    modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
+    return $ Geometry sr h
+
+-- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
+-- and releases the context and all associated objects such as readers, writers
+-- and geometries at the end:
+--
+-- @
+--    withContext $ \ctx -> do
+--
+--        -- Use context
+--
+--        return ()
+-- @
+withContext :: (Context -> IO a) -> IO a
+withContext = bracket mkContext releaseContext
+
+-- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
+--
+-- @
+--    withContext $ \ctx -> do
+--        reader <- mkReader ctx
+--        geometry <- readGeometry read "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
+--
+--        writer <- mkWriter ctx
+--        str <- writeGeometry writer geometry
+--
+--        -- Use string
+--
+--        return ()
+-- @
+--
+-- The geometry is associated with the 'Context' and released when the 'Context'
+-- is released.
+writeGeometry :: Writer -> Geometry -> IO String
+writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
+    ContextState{..} <- readIORef sr
+    str <- bracket
+        (c_GEOSWKTWriter_write_r hCtx hWriter hGeometry)
+        (c_GEOSFree_r_CString hCtx)
+        peekCString
+    return str
