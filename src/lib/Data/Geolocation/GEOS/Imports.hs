@@ -57,29 +57,25 @@ newtype GEOSWKTReaderPtr = GEOSWKTReaderPtr (Ptr GEOSWKTReaderPtr)
 -- |Wraps @GEOSWKTWriter*@
 newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
 
--- |Wraps @GEOSversion@
-foreign import ccall "GEOSversion"
-    c_GEOSversion :: CString
+-- |Wraps @GEOSCoordSeq_destroy_r@
+foreign import ccall "GEOSCoordSeq_destroy_r"
+    c_GEOSCoordSeq_destroy_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> IO ()
+
+-- |Wraps @GEOSEnvelope_r@
+foreign import ccall "GEOSEnvelope_r"
+    c_GEOSEnvelope_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSFree_r@ specialized to @const char*@
 foreign import ccall "GEOSFree_r"
     c_GEOSFree_r_CString :: GEOSContextHandle_t -> CString -> IO ()
 
--- |Wraps @initializeGEOSWithHandlers@ helper function
-foreign import ccall "helpers.h initializeGEOSWithHandlers"
-    c_initializeGEOSWithHandlers :: IO GEOSContextHandle_t
+-- |Wraps @GEOSGetExteriorRing_r@
+foreign import ccall "GEOSGetExteriorRing_r"
+    c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
--- |Wraps @uninitializeGEOS@ helper function
-foreign import ccall "helpers.h uninitializeGEOS"
-    c_uninitializeGEOS :: GEOSContextHandle_t -> IO ()
-
--- |Wraps @getNoticeMessage@ helper function
-foreign import ccall "helpers.h getNoticeMessage"
-    c_getNoticeMessage :: IO CString
-
--- |Wraps @getErrorMessage@ helper function
-foreign import ccall "helpers.h getErrorMessage"
-    c_getErrorMessage :: IO CString
+-- |Wraps @GEOSIntersection_r@
+foreign import ccall "GEOSIntersection_r"
+    c_GEOSIntersection_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSGeom_destroy_r@
 foreign import ccall "GEOSGeom_destroy_r"
@@ -88,10 +84,6 @@ foreign import ccall "GEOSGeom_destroy_r"
 -- |Wraps @GEOSGeom_getCoordSeq_r@
 foreign import ccall "GEOSGeom_getCoordSeq_r"
     c_GEOSGeom_getCoordSeq_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSCoordSequencePtr
-
--- |Wraps @GEOSCoordSeq_destroy_r@
-foreign import ccall "GEOSCoordSeq_destroy_r"
-    c_GEOSCoordSeq_destroy_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> IO ()
 
 -- |Wraps @GEOSWKTReader_create_r@
 foreign import ccall "GEOSWKTReader_create_r"
@@ -117,14 +109,22 @@ foreign import ccall "GEOSWKTWriter_destroy_r"
 foreign import ccall "GEOSWKTWriter_write_r"
     c_GEOSWKTWriter_write_r :: GEOSContextHandle_t -> GEOSWKTWriterPtr -> GEOSGeometryPtr -> IO CString
 
--- |Wraps @GEOSEnvelope_r@
-foreign import ccall "GEOSEnvelope_r"
-    c_GEOSEnvelope_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+-- |Wraps @GEOSversion@
+foreign import ccall "GEOSversion"
+    c_GEOSversion :: CString
 
--- |Wraps @GEOSGetExteriorRing_r@
-foreign import ccall "GEOSGetExteriorRing_r"
-    c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+-- |Wraps @getErrorMessage@ helper function
+foreign import ccall "helpers.h getErrorMessage"
+    c_getErrorMessage :: IO CString
 
--- |Wraps @GEOSIntersection_r@
-foreign import ccall "GEOSIntersection_r"
-    c_GEOSIntersection_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+-- |Wraps @getNoticeMessage@ helper function
+foreign import ccall "helpers.h getNoticeMessage"
+    c_getNoticeMessage :: IO CString
+
+-- |Wraps @initializeGEOSWithHandlers@ helper function
+foreign import ccall "helpers.h initializeGEOSWithHandlers"
+    c_initializeGEOSWithHandlers :: IO GEOSContextHandle_t
+
+-- |Wraps @uninitializeGEOS@ helper function
+foreign import ccall "helpers.h uninitializeGEOS"
+    c_uninitializeGEOS :: GEOSContextHandle_t -> IO ()
