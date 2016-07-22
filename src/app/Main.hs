@@ -164,6 +164,7 @@ namibiaDemo = do
             latitudes = frange latitudeBegin latitudeEnd 1.0
         forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
             square <- mkSquare reader longitude latitude resolution
-            wkt <- writeGeometry writer square
+            overlap <- intersection square country
+            wkt <- writeGeometry writer overlap
             print wkt
     putStrLn "namibiaDemo done"
