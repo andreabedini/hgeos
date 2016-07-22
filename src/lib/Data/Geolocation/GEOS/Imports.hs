@@ -21,17 +21,20 @@ module Data.Geolocation.GEOS.Imports
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
     , GEOSWKTWriterPtr ()
-    , c_GEOSEnvelope_r
-    , c_GEOSFree_r_CString
+    , c_GEOSArea_r
     , c_GEOSCoordSeq_destroy_r
     , c_GEOSCoordSeq_getSize_r
     , c_GEOSCoordSeq_getX_r
     , c_GEOSCoordSeq_getY_r
     , c_GEOSCoordSeq_getZ_r
+    , c_GEOSEnvelope_r
+    , c_GEOSFree_r_CString
     , c_GEOSGeomTypeId_r
     , c_GEOSGeom_destroy_r
     , c_GEOSGeom_getCoordSeq_r
     , c_GEOSGetExteriorRing_r
+    , c_GEOSGetGeometryN_r
+    , c_GEOSGetNumGeometries_r
     , c_GEOSIntersection_r
     , c_GEOSWKTReader_create_r
     , c_GEOSWKTReader_destroy_r
@@ -62,6 +65,10 @@ newtype GEOSWKTReaderPtr = GEOSWKTReaderPtr (Ptr GEOSWKTReaderPtr)
 
 -- |Wraps @GEOSWKTWriter*@
 newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
+
+-- |Wraps @GEOSArea_r@
+foreign import ccall "GEOSArea_r"
+    c_GEOSArea_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_destroy_r@
 foreign import ccall "GEOSCoordSeq_destroy_r"
@@ -106,6 +113,14 @@ foreign import ccall "GEOSGeom_getCoordSeq_r"
 -- |Wraps @GEOSGetExteriorRing_r@
 foreign import ccall "GEOSGetExteriorRing_r"
     c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+
+-- |Wraps @GEOSGetGeometryN_r@
+foreign import ccall "GEOSGetGeometryN_r"
+    c_GEOSGetGeometryN_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> CInt -> IO GEOSGeometryPtr
+
+-- |Wraps @GEOSGetNumGeometries_r@
+foreign import ccall "GEOSGetNumGeometries_r"
+    c_GEOSGetNumGeometries_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO CInt
 
 -- |Wraps @GEOSIntersection_r@
 foreign import ccall "GEOSIntersection_r"

@@ -7,6 +7,7 @@ import Control.Monad
 import Data.Geolocation.GEOS
 import Data.Geolocation.GEOS.Imports
 import Data.List
+import Data.String.Utils
 import Foreign.C
 import Foreign.Ptr
 import Paths_hgeos
@@ -132,8 +133,42 @@ mkSquare reader longitude latitude resolution =
         wkt = printf "POLYGON ((%s))" (intercalate "," (map (\(a, b) -> printf "%f %f" a b) points))
     in readGeometry reader wkt
 
+getGeometries :: Geometry -> IO [Geometry]
+getGeometries geometry = do
+    count <- getNumGeometries geometry
+    forM [0..(count - 1)] (getGeometry geometry)
+
+findBiggestPolygon :: Geometry -> IO Geometry
+findBiggestPolygon geometry = do
+    geometries@(g : gs) <- getGeometries geometry
+    a : as <- sequence $ map area geometries
+    let (g', _) = foldr (\p@(_, a') biggest@(_, aBiggest) -> if a' > aBiggest then p else biggest) (g, a) (zip gs as)
+    return g'
+
 resolution :: Double
 resolution = 1.0
+
+processPolygon :: String -> Resolution -> Longitude -> Latitude -> Geometry -> IO ()
+processPolygon tableName resolution longitude latitude p = do
+    let pId = polygonId resolution longitude latitude
+    shell <- exteriorRing p
+    coordSeq <- coordinateSequence shell
+    (Just xyzs) <- getXYZs coordSeq
+    forM_ (zip [0..] xyzs) $ \(pointId, (x, y, _)) -> do
+        let s = printf
+                    "INSERT INTO %s (polygon_id, point_id, longitude, latitude) VALUES ('%s', %d, %f, %f);\n"
+                    tableName
+                    pId
+                    (pointId :: Int)
+                    x
+                    y
+        putStr s
+
+polygonId :: Resolution -> Longitude -> Latitude -> String
+polygonId resolution longitude latitude = "id_" ++ formatValue longitude ++ "_" ++ formatValue latitude
+    where
+        formatValue :: Double -> String
+        formatValue = replace "-" "m" . replace "." "_" . (printf "%.2f") . mfloor resolution
 
 namibiaDemo :: IO ()
 namibiaDemo = do
@@ -168,7 +203,8 @@ namibiaDemo = do
             x <- isEmpty overlap
             unless x $ do
                 id <- geometryTypeId overlap
-                print id
-            --wkt <- writeGeometry writer overlap
-            --print wkt
+                polygon <- case id of
+                                MultiPolygon -> findBiggestPolygon overlap
+                                Polygon -> return overlap
+                processPolygon "foo" resolution longitude latitude polygon
     putStrLn "namibiaDemo done"

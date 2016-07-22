@@ -19,12 +19,16 @@ module Data.Geolocation.GEOS
     ( Context ()
     , CoordinateSequence ()
     , Geometry ()
+    , GeometryTypeId (..)
     , Reader ()
     , Writer ()
+    , area
     , coordinateSequence
     , envelope
     , exteriorRing
     , geometryTypeId
+    , getGeometry
+    , getNumGeometries
     , getSize
     , getX
     , getY
@@ -83,6 +87,18 @@ data Writer = Writer ContextStateRef GEOSWKTWriterPtr
 -- |References a <https://trac.osgeo.org/geos/ GEOS> geometry
 data Geometry = Geometry ContextStateRef GEOSGeometryPtr
 
+-- |Returns area of a 'Geometry' instance
+area :: Geometry -> IO (Maybe Double)
+area (Geometry sr h) = do
+    ContextState{..} <- readIORef sr
+    alloca $ \valuePtr -> do
+        status <- c_GEOSArea_r hCtx h valuePtr
+        case status of
+             0 -> return Nothing
+             _ -> do
+                value <- peek valuePtr
+                return $ Just (realToFrac value)
+
 -- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
 coordinateSequence :: Geometry -> IO CoordinateSequence
 coordinateSequence (Geometry sr hGeometry) = do
@@ -116,6 +132,18 @@ geometryTypeId (Geometry sr h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGeomTypeId_r hCtx h
     return $ toEnum (fromIntegral value)
+
+-- |Returns child 'Geometry' at given index
+getGeometry :: Geometry -> Int -> IO Geometry
+getGeometry (Geometry sr h) index =
+    doNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral index))
+
+-- |Gets the number of geometries in a 'Geometry' instance
+getNumGeometries :: Geometry -> IO Int
+getNumGeometries (Geometry sr h) = do
+    ContextState{..} <- readIORef sr
+    value <- c_GEOSGetNumGeometries_r hCtx h
+    return $ fromIntegral value
 
 getOrdinate :: (GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
     CoordinateSequence -> Word -> IO (Maybe Double)
