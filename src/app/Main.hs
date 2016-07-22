@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Main (main) where
 
 import Control.Exception
@@ -104,6 +106,12 @@ extent ((x, y, z) : cs) =
                     if z' > maxX then z' else maxZ)) (x, x, y, y, z, z) cs
     in Extent minX maxX minY maxY minZ maxZ
 
+mfloor :: Double -> Double -> Double
+mfloor m x = (fromInteger $ floor (x / m)) * m
+
+resolution :: Double
+resolution = 1.0
+
 namibiaDemo :: IO ()
 namibiaDemo = do
     fileName <- getDataFileName "data/namibia.wkt"
@@ -119,5 +127,14 @@ namibiaDemo = do
         coordSeq <- coordinateSequence shell
         (Just xyzs) <- getXYZs coordSeq
         forM_ xyzs $ \(x, y, z) -> print (x, y, z)
-        print $ extent xyzs
+        let Extent{..} = extent xyzs
+            mfloorRes = mfloor resolution
+            longitudeBegin = mfloorRes minX
+            longitudeEnd = mfloorRes maxX + resolution
+            latitudeBegin = mfloorRes minY
+            latitudeEnd = mfloorRes maxY + resolution
+        print longitudeBegin
+        print longitudeEnd
+        print latitudeBegin
+        print latitudeEnd
     putStrLn "namibiaDemo done"
