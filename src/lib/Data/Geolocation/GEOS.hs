@@ -20,6 +20,8 @@ module Data.Geolocation.GEOS
     , Geometry ()
     , Reader ()
     , Writer ()
+    , envelope
+    , exteriorRing
     , intersection
     , mkReader
     , mkWriter
@@ -73,6 +75,12 @@ track sr f = do
     ContextState{..} <- readIORef sr
     hGeometry <- f hCtx
     modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = hGeometry : hGeometries })
+    return $ Geometry sr hGeometry
+
+doNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
+doNotTrack sr f = do
+    ContextState{..} <- readIORef sr
+    hGeometry <- f hCtx
     return $ Geometry sr hGeometry
 
 -- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
@@ -176,6 +184,44 @@ writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
         peekCString
     return str
 
+-- |Returns the 'Geometry' instance representing the envelope of the supplied
+-- 'Geometry' instance:
+--
+-- @
+--    withContext $ \ctx -> do
+--        reader <- mkReader ctx
+--        g0 <- readGeometry reader "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
+--
+--        g1 <- envelope g0
+--
+--        -- Use geometry
+-- @
+--
+-- The geometry is associated with the 'Context' and released when the 'Context'
+-- is released.
+envelope :: Geometry -> IO Geometry
+envelope (Geometry sr hGeometry) =
+    track sr (\hCtx -> c_GEOSEnvelope_r hCtx hGeometry)
+
+-- |Returns the 'Geometry' instance representing the exterior ring of the
+-- supplied 'Geometry' instance:
+--
+-- @
+--    withContext $ \ctx -> do
+--        reader <- mkReader ctx
+--        g0 <- readGeometry reader "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
+--
+--        g1 <- exteriorRing g0
+--
+--        -- Use geometry
+-- @
+--
+-- The geometry is managed by GEOS internally and is, therefore, not tracked by
+-- the 'Context'.
+exteriorRing :: Geometry -> IO Geometry
+exteriorRing (Geometry sr hGeometry) =
+    doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx hGeometry)
+
 -- |Returns the 'Geometry' instance representing the intersection of the two
 -- supplied 'Geometry' instances:
 --
@@ -188,8 +234,6 @@ writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
 --        g2 <- intersection g0 g1
 --
 --        -- Use geometry
---
---        putStrLn str
 -- @
 --
 -- The geometry is associated with the 'Context' and released when the 'Context'

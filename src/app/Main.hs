@@ -5,6 +5,7 @@ import Data.Geolocation.GEOS
 import Data.Geolocation.GEOS.Imports
 import Foreign.C
 import Foreign.Ptr
+import Paths_hgeos
 
 -- Demonstrates direct use of imports
 -- Lifetimes of various GEOS objects, including readers, writers and
@@ -57,7 +58,26 @@ highLevelAPIDemo = do
 
 main :: IO ()
 main = do
-    s <- peekCString c_GEOSversion
-    putStrLn s
-    lowLevelAPIDemo
-    highLevelAPIDemo
+    --s <- peekCString c_GEOSversion
+    --putStrLn s
+    --lowLevelAPIDemo
+    --highLevelAPIDemo
+    namibiaDemo
+
+printGeometry :: Writer -> Geometry -> IO ()
+printGeometry r g = writeGeometry r g >>= putStrLn
+
+namibiaDemo :: IO ()
+namibiaDemo = do
+    fileName <- getDataFileName "data/namibia.wkt"
+    wkt <- readFile fileName
+    withContext $ \ctx -> do
+        reader <- mkReader ctx
+        writer <- mkWriter ctx
+        let p = printGeometry writer
+
+        country <- readGeometry reader wkt
+        env <- envelope country
+        shell <- exteriorRing env
+        p shell
+        return ()

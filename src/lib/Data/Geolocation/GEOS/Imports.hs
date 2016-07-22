@@ -20,8 +20,10 @@ module Data.Geolocation.GEOS.Imports
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
     , GEOSWKTWriterPtr ()
+    , c_GEOSEnvelope_r
     , c_GEOSFree_r_CString
     , c_GEOSGeom_destroy_r
+    , c_GEOSGetExteriorRing_r
     , c_GEOSIntersection_r
     , c_GEOSWKTReader_create_r
     , c_GEOSWKTReader_destroy_r
@@ -100,6 +102,14 @@ foreign import ccall "GEOSWKTWriter_destroy_r"
 -- |Wraps @GEOSWKTWriter_write_r@
 foreign import ccall "GEOSWKTWriter_write_r"
     c_GEOSWKTWriter_write_r :: GEOSContextHandle_t -> GEOSWKTWriterPtr -> GEOSGeometryPtr -> IO CString
+
+-- |Wraps @GEOSEnvelope_r@
+foreign import ccall "GEOSEnvelope_r"
+    c_GEOSEnvelope_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+
+-- |Wraps @GEOSGetExteriorRing_r@
+foreign import ccall "GEOSGetExteriorRing_r"
+    c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSIntersection_r@
 foreign import ccall "GEOSIntersection_r"
