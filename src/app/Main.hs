@@ -23,7 +23,7 @@ lowLevelAPIDemo = do
                         withWKTWriter ctx $ \writer -> do
                             str <- bracket
                                 (c_GEOSWKTWriter_write_r ctx writer g2)
-                                (c_GEOSFree_r_CChar ctx)
+                                (c_GEOSFree_r_CString ctx)
                                 peekCString
                             putStrLn str
                             putStrLn "lowLevelAPIDemo done"

@@ -172,7 +172,7 @@ writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
     ContextState{..} <- readIORef sr
     str <- bracket
         (c_GEOSWKTWriter_write_r hCtx hWriter hGeometry)
-        (c_GEOSFree_r_CChar hCtx)
+        (c_GEOSFree_r_CString hCtx)
         peekCString
     return str
 

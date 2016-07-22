@@ -20,7 +20,7 @@ module Data.Geolocation.GEOS.Imports
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
     , GEOSWKTWriterPtr ()
-    , c_GEOSFree_r_CChar
+    , c_GEOSFree_r_CString
     , c_GEOSGeom_destroy_r
     , c_GEOSIntersection_r
     , c_GEOSWKTReader_create_r
@@ -55,7 +55,7 @@ foreign import ccall "GEOSversion"
 
 -- |Wraps @GEOSFree_r@ specialized to @const char*@
 foreign import ccall "GEOSFree_r"
-    c_GEOSFree_r_CChar :: GEOSContextHandle_t -> Ptr CChar -> IO ()
+    c_GEOSFree_r_CString :: GEOSContextHandle_t -> CString -> IO ()
 
 -- |Wraps @initializeGEOSWithHandlers@ helper function
 foreign import ccall "helpers.h initializeGEOSWithHandlers"
