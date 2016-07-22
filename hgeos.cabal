@@ -2,8 +2,9 @@ name:                 hgeos
 version:              0.1.1.0
 synopsis:             Simple Haskell bindings to GEOS C API
 description:
-  Simple Haskell bindings to the GEOS C API heavily inspired by
-  <https://github.com/django/django/tree/master/django/contrib/gis/geos Django GEOS bindings>
+  Simple Haskell bindings to the <https://trac.osgeo.org/geos/ GEOS>
+  <http://geos.osgeo.org/doxygen/geos__c_8h_source.html C API> heavily inspired
+  by <https://github.com/django/django/tree/master/django/contrib/gis/geos Django GEOS bindings>
 homepage:             https://github.com/rcook/hgeos#readme
 bug-reports:          https://github.com/rcook/hgeos/issues
 license:              MIT
