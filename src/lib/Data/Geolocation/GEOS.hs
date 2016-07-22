@@ -73,15 +73,15 @@ releaseContext (Context sr) = do
 track :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
 track sr f = do
     ContextState{..} <- readIORef sr
-    hGeometry <- f hCtx
-    modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = hGeometry : hGeometries })
-    return $ Geometry sr hGeometry
+    h <- f hCtx
+    modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
+    return $ Geometry sr h
 
 doNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
 doNotTrack sr f = do
     ContextState{..} <- readIORef sr
-    hGeometry <- f hCtx
-    return $ Geometry sr hGeometry
+    h <- f hCtx
+    return $ Geometry sr h
 
 -- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
 -- and releases the context and all associated objects such as readers, writers
@@ -114,9 +114,9 @@ withContext = bracket mkContext releaseContext
 mkReader :: Context -> IO Reader
 mkReader (Context sr) = do
     ContextState{..} <- readIORef sr
-    hReader <- c_GEOSWKTReader_create_r hCtx
-    modifyIORef' sr (\p@ContextState{..} -> p { hReaders = hReader : hReaders })
-    return $ Reader sr hReader
+    h <- c_GEOSWKTReader_create_r hCtx
+    modifyIORef' sr (\p@ContextState{..} -> p { hReaders = h : hReaders })
+    return $ Reader sr h
 
 -- |Creates a writer used to serialize 'Geometry' instances to
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
@@ -135,9 +135,9 @@ mkReader (Context sr) = do
 mkWriter :: Context -> IO Writer
 mkWriter (Context sr) = do
     ContextState{..} <- readIORef sr
-    hWriter <- c_GEOSWKTWriter_create_r hCtx
-    modifyIORef' sr (\p@ContextState{..} -> p { hWriters = hWriter : hWriters })
-    return $ Writer sr hWriter
+    h <- c_GEOSWKTWriter_create_r hCtx
+    modifyIORef' sr (\p@ContextState{..} -> p { hWriters = h : hWriters })
+    return $ Writer sr h
 
 -- |Deserializes a 'Geometry' instance from the given 'String' using the
 -- supplied 'Reader':
@@ -155,8 +155,8 @@ mkWriter (Context sr) = do
 -- The geometry is associated with the 'Context' and released when the 'Context'
 -- is released.
 readGeometry :: Reader -> String -> IO Geometry
-readGeometry (Reader sr hReader) str = withCString str $ \cs -> do
-    track sr (\hCtx -> c_GEOSWKTReader_read_r hCtx hReader cs)
+readGeometry (Reader sr h) str = withCString str $ \cs -> do
+    track sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
 
 -- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
 --
@@ -200,8 +200,8 @@ writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
 -- The geometry is associated with the 'Context' and released when the 'Context'
 -- is released.
 envelope :: Geometry -> IO Geometry
-envelope (Geometry sr hGeometry) =
-    track sr (\hCtx -> c_GEOSEnvelope_r hCtx hGeometry)
+envelope (Geometry sr h) =
+    track sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
 
 -- |Returns the 'Geometry' instance representing the exterior ring of the
 -- supplied 'Geometry' instance:
@@ -219,8 +219,8 @@ envelope (Geometry sr hGeometry) =
 -- The geometry is managed by GEOS internally and is, therefore, not tracked by
 -- the 'Context'.
 exteriorRing :: Geometry -> IO Geometry
-exteriorRing (Geometry sr hGeometry) =
-    doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx hGeometry)
+exteriorRing (Geometry sr h) =
+    doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
 
 -- |Returns the 'Geometry' instance representing the intersection of the two
 -- supplied 'Geometry' instances:
@@ -239,5 +239,5 @@ exteriorRing (Geometry sr hGeometry) =
 -- The geometry is associated with the 'Context' and released when the 'Context'
 -- is released.
 intersection :: Geometry -> Geometry -> IO Geometry
-intersection (Geometry sr0 hGeometry0) (Geometry sr1 hGeometry1) =
-    track sr0 (\hCtx -> c_GEOSIntersection_r hCtx hGeometry0 hGeometry1)
+intersection (Geometry sr0 h0) (Geometry sr1 h1) =
+    track sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
