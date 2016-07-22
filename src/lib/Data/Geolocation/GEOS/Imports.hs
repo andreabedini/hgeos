@@ -39,8 +39,8 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSWKTWriter_destroy_r
     , c_GEOSWKTWriter_write_r
     , c_GEOSversion
+    , c_finishGEOS_r
     , c_initializeGEOSWithHandlers
-    , c_uninitializeGEOS
     ) where
 
 import Foreign.C
@@ -133,6 +133,10 @@ foreign import ccall "GEOSWKTWriter_write_r"
 foreign import ccall "GEOSversion"
     c_GEOSversion :: CString
 
+-- |Wraps @finishGEOS_r@ helper function
+foreign import ccall "finishGEOS_r"
+    c_finishGEOS_r :: GEOSContextHandle_t -> IO ()
+
 -- |Wraps @getErrorMessage@ helper function
 foreign import ccall "helpers.h getErrorMessage"
     c_getErrorMessage :: IO CString
@@ -144,7 +148,3 @@ foreign import ccall "helpers.h getNoticeMessage"
 -- |Wraps @initializeGEOSWithHandlers@ helper function
 foreign import ccall "helpers.h initializeGEOSWithHandlers"
     c_initializeGEOSWithHandlers :: IO GEOSContextHandle_t
-
--- |Wraps @uninitializeGEOS@ helper function
-foreign import ccall "helpers.h uninitializeGEOS"
-    c_uninitializeGEOS :: GEOSContextHandle_t -> IO ()

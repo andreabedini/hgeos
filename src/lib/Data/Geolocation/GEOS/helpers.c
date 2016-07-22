@@ -32,11 +32,6 @@ GEOSContextHandle_t initializeGEOSWithHandlers()
     return initGEOS_r(noticeHandler, errorHandler);
 }
 
-void uninitializeGEOS(GEOSContextHandle_t handle)
-{
-    finishGEOS_r(handle);
-}
-
 const char* getNoticeMessage()
 {
     return g_noticeMessage;

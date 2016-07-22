@@ -176,7 +176,7 @@ releaseContext (Context sr) = do
     mapM_ (c_GEOSGeom_destroy_r hCtx) hGeometries
     mapM_ (c_GEOSWKTWriter_destroy_r hCtx) hWriters
     mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
-    c_uninitializeGEOS hCtx
+    c_finishGEOS_r hCtx
 
 track :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
 track sr f = do
