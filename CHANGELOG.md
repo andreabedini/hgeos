@@ -1,3 +1,8 @@
+# vNext
+
+* Documentation tweaks
+* Implement accessors for coordinates from coordinate sequences
+
 # v0.1.1.0
 
 * Link to documentation
