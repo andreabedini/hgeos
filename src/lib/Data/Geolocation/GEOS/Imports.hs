@@ -24,6 +24,10 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSEnvelope_r
     , c_GEOSFree_r_CString
     , c_GEOSCoordSeq_destroy_r
+    , c_GEOSCoordSeq_getSize_r
+    , c_GEOSCoordSeq_getX_r
+    , c_GEOSCoordSeq_getY_r
+    , c_GEOSCoordSeq_getZ_r
     , c_GEOSGeom_destroy_r
     , c_GEOSGeom_getCoordSeq_r
     , c_GEOSGetExteriorRing_r
@@ -60,6 +64,22 @@ newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
 -- |Wraps @GEOSCoordSeq_destroy_r@
 foreign import ccall "GEOSCoordSeq_destroy_r"
     c_GEOSCoordSeq_destroy_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> IO ()
+
+-- |Wraps @GEOSCoordSeq_getSize_r@
+foreign import ccall "GEOSCoordSeq_getSize_r"
+    c_GEOSCoordSeq_getSize_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> Ptr CUInt -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_getX_r@
+foreign import ccall "GEOSCoordSeq_getX_r"
+    c_GEOSCoordSeq_getX_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_getY_r@
+foreign import ccall "GEOSCoordSeq_getY_r"
+    c_GEOSCoordSeq_getY_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_getZ_r@
+foreign import ccall "GEOSCoordSeq_getZ_r"
+    c_GEOSCoordSeq_getZ_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSEnvelope_r@
 foreign import ccall "GEOSEnvelope_r"

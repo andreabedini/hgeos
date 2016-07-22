@@ -24,6 +24,10 @@ module Data.Geolocation.GEOS
     , coordinateSequence
     , envelope
     , exteriorRing
+    , getSize
+    , getX
+    , getY
+    , getZ
     , intersection
     , mkReader
     , mkWriter
@@ -35,7 +39,11 @@ module Data.Geolocation.GEOS
 import Control.Exception
 import Data.Geolocation.GEOS.Imports
 import Data.IORef
+import Data.Word
 import Foreign.C
+import Foreign.Marshal.Alloc
+import Foreign.Ptr
+import Foreign.Storable
 
 -- |Represents a <https://trac.osgeo.org/geos/ GEOS> context
 data Context = Context ContextStateRef
@@ -88,6 +96,42 @@ envelope (Geometry sr h) =
 exteriorRing :: Geometry -> IO Geometry
 exteriorRing (Geometry sr h) =
     doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
+
+getOrdinate :: (GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
+    CoordinateSequence -> Word -> IO (Maybe Double)
+getOrdinate f (CoordinateSequence sr h) index = do
+    ContextState{..} <- readIORef sr
+    alloca $ \valuePtr -> do
+        status <- f hCtx h (fromIntegral index) valuePtr
+        case status of
+             0 -> return Nothing
+             _ -> do
+                value <- peek valuePtr
+                return $ Just (realToFrac value)
+
+-- |Gets the size from a coordinate sequence
+getSize :: CoordinateSequence -> IO (Maybe Word)
+getSize (CoordinateSequence sr h) = do
+    ContextState{..} <- readIORef sr
+    alloca $ \sizePtr -> do
+        status <- c_GEOSCoordSeq_getSize_r hCtx h sizePtr
+        case status of
+             0 -> return Nothing
+             _ -> do
+                 size <- peek sizePtr
+                 return $ Just (fromIntegral size)
+
+-- |Gets an "x" ordinate value from a coordinate sequence
+getX :: CoordinateSequence -> Word -> IO (Maybe Double)
+getX = getOrdinate c_GEOSCoordSeq_getX_r
+
+-- |Gets a "y" ordinate value from a coordinate sequence
+getY :: CoordinateSequence -> Word -> IO (Maybe Double)
+getY = getOrdinate c_GEOSCoordSeq_getY_r
+
+-- |Gets a "z" ordinate value from a coordinate sequence
+getZ :: CoordinateSequence -> Word -> IO (Maybe Double)
+getZ = getOrdinate c_GEOSCoordSeq_getZ_r
 
 -- |Returns a 'Geometry' instance representing the intersection of the two
 -- supplied 'Geometry' instances:

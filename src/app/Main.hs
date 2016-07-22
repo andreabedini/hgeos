@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Control.Exception
+import Control.Monad
 import Data.Geolocation.GEOS
 import Data.Geolocation.GEOS.Imports
 import Foreign.C
@@ -58,10 +59,10 @@ highLevelAPIDemo = do
 
 main :: IO ()
 main = do
-    --s <- peekCString c_GEOSversion
-    --putStrLn s
-    --lowLevelAPIDemo
-    --highLevelAPIDemo
+    s <- peekCString c_GEOSversion
+    putStrLn s
+    lowLevelAPIDemo
+    highLevelAPIDemo
     namibiaDemo
 
 printGeometry :: Writer -> Geometry -> IO ()
@@ -80,5 +81,10 @@ namibiaDemo = do
         env <- envelope country
         shell <- exteriorRing env
         coordSeq <- coordinateSequence shell
-        p shell
-        return ()
+        (Just size) <- getSize coordSeq
+        forM_ [0..(size - 1)] $ \i -> do
+            (Just x) <- getX coordSeq i
+            (Just y) <- getY coordSeq i
+            (Just z) <- getZ coordSeq i
+            print (x, y, z)
+    putStrLn "namibiaDemo done"
