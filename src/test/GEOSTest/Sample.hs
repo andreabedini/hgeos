@@ -89,8 +89,8 @@ resolution = 1.0
 processPolygon :: String -> Resolution -> Longitude -> Latitude -> Geometry -> IO ()
 processPolygon tableName resolution longitude latitude p = do
     let pId = polygonId resolution longitude latitude
-    (Just shell) <- exteriorRing p
-    (Just coordSeq) <- coordinateSequence shell
+    (Just shell) <- getExteriorRing p
+    (Just coordSeq) <- getCoordSeq shell
     (Just xyzs) <- getXYZs coordSeq
     forM_ (zip [0..] xyzs) $ \(pointId, (x, y, _)) -> do
         let s = printf
@@ -120,8 +120,8 @@ demo = do
 
         (Just country) <- readGeometry reader wkt
         (Just env) <- envelope country
-        (Just shell) <- exteriorRing env
-        (Just coordSeq) <- coordinateSequence shell
+        (Just shell) <- getExteriorRing env
+        (Just coordSeq) <- getCoordSeq shell
         (Just xyzs) <- getXYZs coordSeq
         forM_ xyzs $ \(x, y, z) -> print (x, y, z)
         let Extent{..} = extent xyzs
@@ -141,7 +141,7 @@ demo = do
             (Just overlap) <- intersection square country
             (Just x) <- isEmpty overlap
             unless x $ do
-                (Just t) <- geometryType overlap
+                (Just t) <- geomTypeId overlap
                 polygon <- case t of
                                 MultiPolygon -> findBiggestPolygon overlap
                                 Polygon -> return overlap

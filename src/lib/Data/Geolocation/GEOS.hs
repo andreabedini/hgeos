@@ -27,10 +27,10 @@ module Data.Geolocation.GEOS
     , Reader ()
     , Writer ()
     , area
-    , coordinateSequence
     , envelope
-    , exteriorRing
-    , geometryType
+    , geomTypeId
+    , getCoordSeq
+    , getExteriorRing
     , getGeometry
     , getNumGeometries
     , getSize
@@ -122,35 +122,35 @@ checkAndTrack sr f = do
         modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
         return $ Just (Geometry sr h)
 
--- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
-coordinateSequence :: Geometry -> IO (Maybe CoordinateSequence)
-coordinateSequence (Geometry sr hGeometry) = do
-    ContextState{..} <- readIORef sr
-    h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
-    return $ if isNullPtr h
-                then Nothing
-                else Just $ CoordinateSequence sr h
-
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
 envelope :: Geometry -> IO (Maybe Geometry)
 envelope (Geometry sr h) =
     checkAndTrack sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
 
--- |Returns a 'Geometry' instance representing the exterior ring of the
--- supplied 'Geometry'
-exteriorRing :: Geometry -> IO (Maybe Geometry)
-exteriorRing (Geometry sr h) =
-    checkAndDoNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
-
 -- |Returns type of a 'Geometry' instance
-geometryType :: Geometry -> IO (Maybe GeometryType)
-geometryType (Geometry sr h) = do
+geomTypeId :: Geometry -> IO (Maybe GeometryType)
+geomTypeId (Geometry sr h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGeomTypeId_r hCtx h
     return $ if value == -1
                 then Nothing
                 else Just $ toEnum (fromIntegral value)
+
+-- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
+getCoordSeq :: Geometry -> IO (Maybe CoordinateSequence)
+getCoordSeq (Geometry sr hGeometry) = do
+    ContextState{..} <- readIORef sr
+    h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
+    return $ if isNullPtr h
+                then Nothing
+                else Just $ CoordinateSequence sr h
+
+-- |Returns a 'Geometry' instance representing the exterior ring of the
+-- supplied 'Geometry'
+getExteriorRing :: Geometry -> IO (Maybe Geometry)
+getExteriorRing (Geometry sr h) =
+    checkAndDoNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
 
 -- |Returns child 'Geometry' at given index
 getGeometry :: Geometry -> Int -> IO (Maybe Geometry)
