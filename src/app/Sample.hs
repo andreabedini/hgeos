@@ -2,6 +2,7 @@
 
 module Sample (demo) where
 
+import Arith
 import Control.Monad
 import Data.Geolocation.GEOS
 import Data.List
@@ -47,14 +48,6 @@ extent ((x, y, z) : cs) =
                     if z' < minZ then z' else minZ,
                     if z' > maxX then z' else maxZ)) (x, x, y, y, z, z) cs
     in Extent minX maxX minY maxY minZ maxZ
-
-mfloor :: Double -> Double -> Double
-mfloor m x = (fromInteger $ floor (x / m)) * m
-
-frange :: Double -> Double -> Double -> [Double]
-frange lower upper step =
-    let count = (upper - lower) / step
-    in [lower + (fromIntegral i) * step | i <- [0..(round count - 1)]]
 
 type Longitude = Double
 type Latitude = Double

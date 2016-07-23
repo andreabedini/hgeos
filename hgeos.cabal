@@ -43,7 +43,8 @@ test-suite hgeos-app
   build-depends:      MissingH
                     , base >= 4.7 && < 5
                     , hgeos
-  other-modules:      HighLevelAPI
+  other-modules:      Arith
+                    , HighLevelAPI
                     , LowLevelAPI
                     , Main
                     , Sample
