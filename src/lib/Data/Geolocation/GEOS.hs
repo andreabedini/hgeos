@@ -23,14 +23,14 @@ module Data.Geolocation.GEOS
     ( Context ()
     , CoordinateSequence ()
     , Geometry ()
-    , GeometryTypeId (..)
+    , GeometryType (..)
     , Reader ()
     , Writer ()
     , area
     , coordinateSequence
     , envelope
     , exteriorRing
-    , geometryTypeId
+    , geometryType
     , getGeometry
     , getNumGeometries
     , getSize
@@ -73,7 +73,7 @@ type ContextStateRef = IORef ContextState
 data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
 
 -- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry type ID
-data GeometryTypeId =
+data GeometryType =
     Point |
     LineString |
     LinearRing |
@@ -131,9 +131,9 @@ exteriorRing :: Geometry -> IO Geometry
 exteriorRing (Geometry sr h) =
     doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
 
--- |Returns type ID of a 'Geometry' instance
-geometryTypeId :: Geometry -> IO GeometryTypeId
-geometryTypeId (Geometry sr h) = do
+-- |Returns type of a 'Geometry' instance
+geometryType :: Geometry -> IO GeometryType
+geometryType (Geometry sr h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGeomTypeId_r hCtx h
     return $ toEnum (fromIntegral value)

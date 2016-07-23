@@ -1,6 +1,8 @@
 # vNext
 
 * Rearranges test sources
+* Renames "GeometryTypeId" to "GeometryType"
+* Renames "geometryTypeId" to "geometryType"
 
 # v0.1.2.0
 

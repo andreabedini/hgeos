@@ -10,10 +10,13 @@ import GEOSTest.Arith
 import Paths_hgeos
 import Text.Printf
 
+type Coordinate = (Double, Double, Double)
+type Latitude = Double
+type Longitude = Double
+type Resolution = Double
+
 printGeometry :: Writer -> Geometry -> IO ()
 printGeometry r g = writeGeometry r g >>= putStrLn
-
-type Coordinate = (Double, Double, Double)
 
 getXYZs :: CoordinateSequence -> IO (Maybe [Coordinate])
 getXYZs coordSeq = do
@@ -48,10 +51,6 @@ extent ((x, y, z) : cs) =
                     if z' < minZ then z' else minZ,
                     if z' > maxX then z' else maxZ)) (x, x, y, y, z, z) cs
     in Extent minX maxX minY maxY minZ maxZ
-
-type Longitude = Double
-type Latitude = Double
-type Resolution = Double
 
 mkSquare :: Reader -> Longitude -> Latitude -> Resolution -> IO Geometry
 mkSquare reader longitude latitude resolution =
@@ -135,8 +134,8 @@ demo = do
             overlap <- intersection square country
             x <- isEmpty overlap
             unless x $ do
-                id <- geometryTypeId overlap
-                polygon <- case id of
+                t <- geometryType overlap
+                polygon <- case t of
                                 MultiPolygon -> findBiggestPolygon overlap
                                 Polygon -> return overlap
                 processPolygon "foo" resolution longitude latitude polygon
