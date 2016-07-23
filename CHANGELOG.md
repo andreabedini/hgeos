@@ -1,4 +1,4 @@
-# vNext
+# v0.1.2.0
 
 * Tweaks to documentation
 * Implements accessors for coordinates from coordinate sequences
