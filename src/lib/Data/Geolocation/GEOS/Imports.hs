@@ -69,6 +69,8 @@ instance NullablePtr GEOSCoordSequencePtr where
 
 -- |Wraps @GEOSGeometry*@
 newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr)
+instance NullablePtr GEOSGeometryPtr where
+    isNullPtr (GEOSGeometryPtr p) = p == nullPtr
 
 -- |Wraps @GEOSWKTReader*@
 newtype GEOSWKTReaderPtr = GEOSWKTReaderPtr (Ptr GEOSWKTReaderPtr)

@@ -121,9 +121,9 @@ doNotTrack sr f = do
 
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
-envelope :: Geometry -> IO Geometry
+envelope :: Geometry -> IO (Maybe Geometry)
 envelope (Geometry sr h) =
-    track sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
+    checkAndTrack sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
 
 -- |Returns a 'Geometry' instance representing the exterior ring of the
 -- supplied 'Geometry'
@@ -188,9 +188,9 @@ getZ = getOrdinate c_GEOSCoordSeq_getZ_r
 
 -- |Returns a 'Geometry' instance representing the intersection of the two
 -- supplied 'Geometry' instances:
-intersection :: Geometry -> Geometry -> IO Geometry
+intersection :: Geometry -> Geometry -> IO (Maybe Geometry)
 intersection (Geometry sr0 h0) (Geometry sr1 h1) =
-    track sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
+    checkAndTrack sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
 
 -- |Returns value indicating if specified 'Geometry' instance is empty
 isEmpty :: Geometry -> IO Bool
@@ -225,9 +225,9 @@ mkWriter (Context sr) = do
 
 -- |Deserializes a 'Geometry' instance from the given 'String' using the
 -- supplied 'Reader':
-readGeometry :: Reader -> String -> IO Geometry
+readGeometry :: Reader -> String -> IO (Maybe Geometry)
 readGeometry (Reader sr h) str = withCString str $ \cs -> do
-    track sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
+    checkAndTrack sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
 
 releaseContext :: Context -> IO ()
 releaseContext (Context sr) = do
@@ -238,12 +238,15 @@ releaseContext (Context sr) = do
     mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
     c_finishGEOS_r hCtx
 
-track :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
-track sr f = do
+checkAndTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
+checkAndTrack sr f = do
     ContextState{..} <- readIORef sr
     h <- f hCtx
-    modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
-    return $ Geometry sr h
+    if isNullPtr h
+    then return Nothing
+    else do
+        modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
+        return $ Just (Geometry sr h)
 
 -- |Reports version of GEOS API
 version :: IO String

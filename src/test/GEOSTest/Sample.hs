@@ -53,7 +53,7 @@ extent ((x, y, z) : cs) =
     in Extent minX maxX minY maxY minZ maxZ
 
 mkSquare :: Reader -> Longitude -> Latitude -> Resolution -> IO Geometry
-mkSquare reader longitude latitude resolution =
+mkSquare reader longitude latitude resolution = do
     let points = [
             (longitude, latitude),
             (longitude + resolution, latitude),
@@ -62,7 +62,8 @@ mkSquare reader longitude latitude resolution =
             (longitude, latitude)
             ]
         wkt = printf "POLYGON ((%s))" (intercalate "," (map (\(a, b) -> printf "%f %f" a b) points))
-    in readGeometry reader wkt
+    (Just g) <- readGeometry reader wkt
+    return g
 
 getGeometries :: Geometry -> IO [Geometry]
 getGeometries geometry = do
@@ -111,8 +112,8 @@ demo = do
         writer <- mkWriter ctx
         let p = printGeometry writer
 
-        country <- readGeometry reader wkt
-        env <- envelope country
+        (Just country) <- readGeometry reader wkt
+        (Just env) <- envelope country
         shell <- exteriorRing env
         (Just coordSeq) <- coordinateSequence shell
         (Just xyzs) <- getXYZs coordSeq
@@ -131,7 +132,7 @@ demo = do
             latitudes = frange latitudeBegin latitudeEnd 1.0
         forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
             square <- mkSquare reader longitude latitude resolution
-            overlap <- intersection square country
+            (Just overlap) <- intersection square country
             x <- isEmpty overlap
             unless x $ do
                 t <- geometryType overlap
