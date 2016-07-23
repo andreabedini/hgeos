@@ -135,7 +135,7 @@ demo = do
         forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
             square <- mkSquare reader longitude latitude resolution
             (Just overlap) <- intersection square country
-            x <- isEmpty overlap
+            (Just x) <- isEmpty overlap
             unless x $ do
                 (Just t) <- geometryType overlap
                 polygon <- case t of

@@ -209,11 +209,14 @@ intersection (Geometry sr0 h0) (Geometry sr1 h1) =
     checkAndTrack sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
 
 -- |Returns value indicating if specified 'Geometry' instance is empty
-isEmpty :: Geometry -> IO Bool
+isEmpty :: Geometry -> IO (Maybe Bool)
 isEmpty (Geometry sr h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSisEmpty_r hCtx h
-    return $ value /= 0
+    return $ case value of
+                  0 -> Just False
+                  1 -> Just True
+                  _ -> Nothing
 
 mkContext :: IO Context
 mkContext = do
