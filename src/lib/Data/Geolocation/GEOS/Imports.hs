@@ -74,9 +74,13 @@ instance NullablePtr GEOSGeometryPtr where
 
 -- |Wraps @GEOSWKTReader*@
 newtype GEOSWKTReaderPtr = GEOSWKTReaderPtr (Ptr GEOSWKTReaderPtr)
+instance NullablePtr GEOSWKTReaderPtr where
+    isNullPtr (GEOSWKTReaderPtr p) = p == nullPtr
 
 -- |Wraps @GEOSWKTWriter*@
 newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
+instance NullablePtr GEOSWKTWriterPtr where
+    isNullPtr (GEOSWKTWriterPtr p) = p == nullPtr
 
 -- |Wraps @GEOSArea_r@
 foreign import ccall "GEOSArea_r"

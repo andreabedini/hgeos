@@ -226,21 +226,27 @@ mkContext = do
 
 -- |Creates a reader used to deserialize 'Geometry' instances from
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
-mkReader :: Context -> IO Reader
+mkReader :: Context -> IO (Maybe Reader)
 mkReader (Context sr) = do
     ContextState{..} <- readIORef sr
     h <- c_GEOSWKTReader_create_r hCtx
-    modifyIORef' sr (\p@ContextState{..} -> p { hReaders = h : hReaders })
-    return $ Reader sr h
+    if isNullPtr h
+    then return Nothing
+    else do
+        modifyIORef' sr (\p@ContextState{..} -> p { hReaders = h : hReaders })
+        return $ Just (Reader sr h)
 
 -- |Creates a writer used to serialize 'Geometry' instances to
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
-mkWriter :: Context -> IO Writer
+mkWriter :: Context -> IO (Maybe Writer)
 mkWriter (Context sr) = do
     ContextState{..} <- readIORef sr
     h <- c_GEOSWKTWriter_create_r hCtx
-    modifyIORef' sr (\p@ContextState{..} -> p { hWriters = h : hWriters })
-    return $ Writer sr h
+    if isNullPtr h
+    then return Nothing
+    else do
+        modifyIORef' sr (\p@ContextState{..} -> p { hWriters = h : hWriters })
+        return $ Just (Writer sr h)
 
 -- |Deserializes a 'Geometry' instance from the given 'String' using the
 -- supplied 'Reader':

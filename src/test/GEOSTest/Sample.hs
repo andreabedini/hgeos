@@ -110,8 +110,8 @@ demo = do
     fileName <- getDataFileName "data/namibia.wkt"
     wkt <- readFile fileName
     withGEOS $ \ctx -> do
-        reader <- mkReader ctx
-        writer <- mkWriter ctx
+        (Just reader) <- mkReader ctx
+        (Just writer) <- mkWriter ctx
         let p = printGeometry writer
 
         (Just country) <- readGeometry reader wkt
