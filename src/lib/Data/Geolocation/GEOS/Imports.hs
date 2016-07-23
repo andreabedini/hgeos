@@ -13,6 +13,8 @@ low-level access to the native functions for parts of the C API for which
 high-level wrappers do not yet exist.
 
 For the high-level API, see "Data.Geolocation.GEOS".
+
+<https://github.com/rcook/hgeos/blob/master/src/app/LowLevelAPI.hs View sample>
 -}
 
 module Data.Geolocation.GEOS.Imports

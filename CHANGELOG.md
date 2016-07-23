@@ -5,6 +5,7 @@
 * Expands coverage of API
 * Extends examples
 * Adds "version" function to report GEOS API version
+* Adds links to full code samples
 
 # v0.1.1.0
 
