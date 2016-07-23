@@ -156,7 +156,7 @@ foreign import ccall "GEOSisEmpty_r"
 
 -- |Wraps @GEOSversion@
 foreign import ccall "GEOSversion"
-    c_GEOSversion :: CString
+    c_GEOSversion :: IO CString
 
 -- |Wraps @finishGEOS_r@ helper function
 foreign import ccall "finishGEOS_r"

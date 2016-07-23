@@ -38,6 +38,7 @@ module Data.Geolocation.GEOS
     , mkReader
     , mkWriter
     , readGeometry
+    , version
     , withContext
     , writeGeometry
     ) where
@@ -239,6 +240,10 @@ track sr f = do
     h <- f hCtx
     modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
     return $ Geometry sr h
+
+-- |Reports version of GEOS API
+version :: IO String
+version = c_GEOSversion >>= peekCString
 
 -- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
 -- and releases the context and all associated objects such as readers, writers

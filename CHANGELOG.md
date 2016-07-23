@@ -4,6 +4,7 @@
 * Implements accessors for coordinates from coordinate sequences
 * Expands coverage of API
 * Extends examples
+* Adds "version" function to report GEOS API version
 
 # v0.1.1.0
 
