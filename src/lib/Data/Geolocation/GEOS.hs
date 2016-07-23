@@ -43,7 +43,7 @@ module Data.Geolocation.GEOS
     , mkWriter
     , readGeometry
     , version
-    , withContext
+    , withGEOS
     , writeGeometry
     ) where
 
@@ -254,14 +254,14 @@ version = c_GEOSversion >>= peekCString
 -- and geometries at the end:
 --
 -- @
---    withContext $ \ctx -> do
+--    withGEOS $ \ctx -> do
 --
 --        -- Use context
 --
 --        return ()
 -- @
-withContext :: (Context -> IO a) -> IO a
-withContext = bracket mkContext releaseContext
+withGEOS :: (Context -> IO a) -> IO a
+withGEOS = bracket mkContext releaseContext
 
 -- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
 writeGeometry :: Writer -> Geometry -> IO String

@@ -6,6 +6,7 @@
 * Extends examples
 * Adds "version" function to report GEOS API version
 * Adds links to full code samples
+* Renames "withContext" to "withGEOS"
 
 # v0.1.1.0
 

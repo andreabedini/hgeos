@@ -114,7 +114,7 @@ demo :: IO ()
 demo = do
     fileName <- getDataFileName "data/namibia.wkt"
     wkt <- readFile fileName
-    withContext $ \ctx -> do
+    withGEOS $ \ctx -> do
         reader <- mkReader ctx
         writer <- mkWriter ctx
         let p = printGeometry writer
