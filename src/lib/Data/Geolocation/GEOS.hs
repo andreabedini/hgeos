@@ -282,11 +282,10 @@ withGEOS :: (Context -> IO a) -> IO a
 withGEOS = bracket mkContext releaseContext
 
 -- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
-writeGeometry :: Writer -> Geometry -> IO String
+writeGeometry :: Writer -> Geometry -> IO (Maybe String)
 writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
     ContextState{..} <- readIORef sr
-    str <- bracket
+    bracket
         (c_GEOSWKTWriter_write_r hCtx hWriter hGeometry)
         (c_GEOSFree_r_CString hCtx)
-        peekCString
-    return str
+        (\cs -> if cs == nullPtr then return Nothing else Just <$> peekCString cs)

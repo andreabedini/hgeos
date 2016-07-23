@@ -13,6 +13,6 @@ demo = do
         (Just g1) <- readGeometry reader "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
         (Just g2) <- intersection g0 g1
         (Just writer) <- mkWriter ctx
-        str <- writeGeometry writer g2
+        (Just str) <- writeGeometry writer g2
         putStrLn str
         putStrLn "HighLevelAPI.demo done"

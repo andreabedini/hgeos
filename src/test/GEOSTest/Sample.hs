@@ -16,7 +16,11 @@ type Longitude = Double
 type Resolution = Double
 
 printGeometry :: Writer -> Geometry -> IO ()
-printGeometry r g = writeGeometry r g >>= putStrLn
+printGeometry r g = do
+    maybeStr <- writeGeometry r g
+    case maybeStr of
+         Nothing -> putStrLn "(invalid)"
+         (Just str) -> putStrLn str
 
 getXYZs :: CoordinateSequence -> IO (Maybe [Coordinate])
 getXYZs coordSeq = do
