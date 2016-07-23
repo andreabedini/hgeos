@@ -67,7 +67,7 @@ mkSquare reader longitude latitude resolution = do
 
 getGeometries :: Geometry -> IO [Geometry]
 getGeometries geometry = do
-    count <- getNumGeometries geometry
+    (Just count) <- getNumGeometries geometry
     forM [0..(count - 1)] $ \i -> do
         (Just g) <- getGeometry geometry i
         return g

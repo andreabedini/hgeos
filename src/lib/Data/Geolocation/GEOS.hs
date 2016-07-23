@@ -158,11 +158,13 @@ getGeometry (Geometry sr h) index =
     checkAndDoNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral index))
 
 -- |Gets the number of geometries in a 'Geometry' instance
-getNumGeometries :: Geometry -> IO Int
+getNumGeometries :: Geometry -> IO (Maybe Int)
 getNumGeometries (Geometry sr h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGetNumGeometries_r hCtx h
-    return $ fromIntegral value
+    return $ if value == -1
+                then Nothing
+                else Just $ fromIntegral value
 
 getOrdinate :: (GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
     CoordinateSequence -> Word -> IO (Maybe Double)
