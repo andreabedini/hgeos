@@ -144,11 +144,13 @@ exteriorRing (Geometry sr h) =
     checkAndDoNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
 
 -- |Returns type of a 'Geometry' instance
-geometryType :: Geometry -> IO GeometryType
+geometryType :: Geometry -> IO (Maybe GeometryType)
 geometryType (Geometry sr h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGeomTypeId_r hCtx h
-    return $ toEnum (fromIntegral value)
+    return $ if value == -1
+                then Nothing
+                else Just $ toEnum (fromIntegral value)
 
 -- |Returns child 'Geometry' at given index
 getGeometry :: Geometry -> Int -> IO (Maybe Geometry)

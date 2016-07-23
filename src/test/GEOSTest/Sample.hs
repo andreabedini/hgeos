@@ -137,7 +137,7 @@ demo = do
             (Just overlap) <- intersection square country
             x <- isEmpty overlap
             unless x $ do
-                t <- geometryType overlap
+                (Just t) <- geometryType overlap
                 polygon <- case t of
                                 MultiPolygon -> findBiggestPolygon overlap
                                 Polygon -> return overlap
