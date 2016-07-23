@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Sample (demo) where
+module GEOSTest.Sample (demo) where
 
-import Arith
 import Control.Monad
 import Data.Geolocation.GEOS
 import Data.List
 import Data.String.Utils
+import GEOSTest.Arith
 import Paths_hgeos
 import Text.Printf
 

@@ -3,10 +3,9 @@
 module Main (main) where
 
 import Data.Geolocation.GEOS
-import Foreign.C
-import qualified HighLevelAPI
-import qualified LowLevelAPI
-import qualified Sample
+import qualified GEOSTest.HighLevelAPI as HighLevelAPI
+import qualified GEOSTest.LowLevelAPI as LowLevelAPI
+import qualified GEOSTest.Sample as Sample
 
 main :: IO ()
 main = do

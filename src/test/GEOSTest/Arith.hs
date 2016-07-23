@@ -1,4 +1,4 @@
-module Arith
+module GEOSTest.Arith
     ( frange
     , mfloor
     ) where

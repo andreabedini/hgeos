@@ -1,4 +1,4 @@
-module HighLevelAPI (demo) where
+module GEOSTest.HighLevelAPI (demo) where
 
 import Data.Geolocation.GEOS
 

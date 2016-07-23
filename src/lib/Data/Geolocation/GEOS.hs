@@ -12,9 +12,9 @@ management of lifetimes of objects such as readers, writers and geometries.
 
 For the low-level FFI bindings, see "Data.Geolocation.GEOS.Imports".
 
-<https://github.com/rcook/hgeos/blob/master/src/app/HighLevelAPI.hs View sample 1>
+<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/HighLevelAPI.hs View sample 1>
 
-<https://github.com/rcook/hgeos/blob/master/src/app/Sample.hs View sample 2>
+<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/Sample.hs View sample 2>
 -}
 
 {-# LANGUAGE RecordWildCards #-}

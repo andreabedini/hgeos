@@ -1,4 +1,4 @@
-module LowLevelAPI (demo) where
+module GEOSTest.LowLevelAPI (demo) where
 
 import Control.Exception
 import Data.Geolocation.GEOS.Imports
