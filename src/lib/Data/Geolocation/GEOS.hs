@@ -105,13 +105,13 @@ area (Geometry sr h) = do
                 return $ Just (realToFrac value)
 
 -- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
-coordinateSequence :: Geometry -> IO CoordinateSequence
+coordinateSequence :: Geometry -> IO (Maybe CoordinateSequence)
 coordinateSequence (Geometry sr hGeometry) = do
     ContextState{..} <- readIORef sr
     h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
-    -- Do not track
-    --modifyIORef' sr (\p@ContextState{..} -> p { hCoordinateSequences = h : hCoordinateSequences })
-    return $ CoordinateSequence sr h
+    return $ if isNullPtr h
+                then Nothing
+                else Just $ CoordinateSequence sr h
 
 doNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
 doNotTrack sr f = do

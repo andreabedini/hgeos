@@ -83,7 +83,7 @@ processPolygon :: String -> Resolution -> Longitude -> Latitude -> Geometry -> I
 processPolygon tableName resolution longitude latitude p = do
     let pId = polygonId resolution longitude latitude
     shell <- exteriorRing p
-    coordSeq <- coordinateSequence shell
+    (Just coordSeq) <- coordinateSequence shell
     (Just xyzs) <- getXYZs coordSeq
     forM_ (zip [0..] xyzs) $ \(pointId, (x, y, _)) -> do
         let s = printf
@@ -114,7 +114,7 @@ demo = do
         country <- readGeometry reader wkt
         env <- envelope country
         shell <- exteriorRing env
-        coordSeq <- coordinateSequence shell
+        (Just coordSeq) <- coordinateSequence shell
         (Just xyzs) <- getXYZs coordSeq
         forM_ xyzs $ \(x, y, z) -> print (x, y, z)
         let Extent{..} = extent xyzs

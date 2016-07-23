@@ -1,8 +1,8 @@
 # vNext
 
 * Rearranges test sources
-* Renames "GeometryTypeId" to "GeometryType"
-* Renames "geometryTypeId" to "geometryType"
+* Adds proper handling to high-level API
+* Renames high-level API functions
 
 # v0.1.2.0
 

@@ -23,6 +23,7 @@ module Data.Geolocation.GEOS.Imports
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
     , GEOSWKTWriterPtr ()
+    , NullablePtr (isNullPtr)
     , c_GEOSArea_r
     , c_GEOSCoordSeq_destroy_r
     , c_GEOSCoordSeq_getSize_r
@@ -53,11 +54,18 @@ module Data.Geolocation.GEOS.Imports
 import Foreign.C
 import Foreign.Ptr
 
+-- |Determines if given pointer is null
+class NullablePtr a where
+    -- |Returns @True@ if pointer is null, @False@ otherwise
+    isNullPtr :: a -> Bool
+
 -- |Wraps @GEOSContextHandle_t@
 newtype GEOSContextHandle_t = GEOSContextHandle_t (Ptr GEOSContextHandle_t)
 
 -- |Wraps @GEOSCoordSequence*@
 newtype GEOSCoordSequencePtr = GEOSCoordSequencePtr (Ptr GEOSCoordSequencePtr)
+instance NullablePtr GEOSCoordSequencePtr where
+    isNullPtr (GEOSCoordSequencePtr p) = p == nullPtr
 
 -- |Wraps @GEOSGeometry*@
 newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr)
