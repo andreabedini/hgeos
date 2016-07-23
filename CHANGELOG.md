@@ -1,3 +1,7 @@
+# vNext
+
+* Rearranges test sources
+
 # v0.1.2.0
 
 * Tweaks to documentation
