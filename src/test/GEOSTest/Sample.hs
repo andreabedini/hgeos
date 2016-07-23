@@ -68,7 +68,9 @@ mkSquare reader longitude latitude resolution = do
 getGeometries :: Geometry -> IO [Geometry]
 getGeometries geometry = do
     count <- getNumGeometries geometry
-    forM [0..(count - 1)] (getGeometry geometry)
+    forM [0..(count - 1)] $ \i -> do
+        (Just g) <- getGeometry geometry i
+        return g
 
 findBiggestPolygon :: Geometry -> IO Geometry
 findBiggestPolygon geometry = do
@@ -83,7 +85,7 @@ resolution = 1.0
 processPolygon :: String -> Resolution -> Longitude -> Latitude -> Geometry -> IO ()
 processPolygon tableName resolution longitude latitude p = do
     let pId = polygonId resolution longitude latitude
-    shell <- exteriorRing p
+    (Just shell) <- exteriorRing p
     (Just coordSeq) <- coordinateSequence shell
     (Just xyzs) <- getXYZs coordSeq
     forM_ (zip [0..] xyzs) $ \(pointId, (x, y, _)) -> do
@@ -114,7 +116,7 @@ demo = do
 
         (Just country) <- readGeometry reader wkt
         (Just env) <- envelope country
-        shell <- exteriorRing env
+        (Just shell) <- exteriorRing env
         (Just coordSeq) <- coordinateSequence shell
         (Just xyzs) <- getXYZs coordSeq
         forM_ xyzs $ \(x, y, z) -> print (x, y, z)

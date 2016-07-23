@@ -104,6 +104,24 @@ area (Geometry sr h) = do
                 value <- peek valuePtr
                 return $ Just (realToFrac value)
 
+checkAndDoNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
+checkAndDoNotTrack sr f = do
+    ContextState{..} <- readIORef sr
+    h <- f hCtx
+    return $ if isNullPtr h
+                then Nothing
+                else Just $ Geometry sr h
+
+checkAndTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
+checkAndTrack sr f = do
+    ContextState{..} <- readIORef sr
+    h <- f hCtx
+    if isNullPtr h
+    then return Nothing
+    else do
+        modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
+        return $ Just (Geometry sr h)
+
 -- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
 coordinateSequence :: Geometry -> IO (Maybe CoordinateSequence)
 coordinateSequence (Geometry sr hGeometry) = do
@@ -113,12 +131,6 @@ coordinateSequence (Geometry sr hGeometry) = do
                 then Nothing
                 else Just $ CoordinateSequence sr h
 
-doNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO Geometry
-doNotTrack sr f = do
-    ContextState{..} <- readIORef sr
-    h <- f hCtx
-    return $ Geometry sr h
-
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
 envelope :: Geometry -> IO (Maybe Geometry)
@@ -127,9 +139,9 @@ envelope (Geometry sr h) =
 
 -- |Returns a 'Geometry' instance representing the exterior ring of the
 -- supplied 'Geometry'
-exteriorRing :: Geometry -> IO Geometry
+exteriorRing :: Geometry -> IO (Maybe Geometry)
 exteriorRing (Geometry sr h) =
-    doNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
+    checkAndDoNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
 
 -- |Returns type of a 'Geometry' instance
 geometryType :: Geometry -> IO GeometryType
@@ -139,9 +151,9 @@ geometryType (Geometry sr h) = do
     return $ toEnum (fromIntegral value)
 
 -- |Returns child 'Geometry' at given index
-getGeometry :: Geometry -> Int -> IO Geometry
+getGeometry :: Geometry -> Int -> IO (Maybe Geometry)
 getGeometry (Geometry sr h) index =
-    doNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral index))
+    checkAndDoNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral index))
 
 -- |Gets the number of geometries in a 'Geometry' instance
 getNumGeometries :: Geometry -> IO Int
@@ -237,16 +249,6 @@ releaseContext (Context sr) = do
     mapM_ (c_GEOSWKTWriter_destroy_r hCtx) hWriters
     mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
     c_finishGEOS_r hCtx
-
-checkAndTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
-checkAndTrack sr f = do
-    ContextState{..} <- readIORef sr
-    h <- f hCtx
-    if isNullPtr h
-    then return Nothing
-    else do
-        modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
-        return $ Just (Geometry sr h)
 
 -- |Reports version of GEOS API
 version :: IO String
