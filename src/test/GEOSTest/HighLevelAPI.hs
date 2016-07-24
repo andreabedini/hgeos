@@ -5,6 +5,7 @@ import Data.Geolocation.GEOS
 -- Demonstrates use of high-level API
 -- Lifetimes of GEOS objects are automatically managed by the context objects
 -- which guarantees that they are released when the context goes out of scope
+-- TODO: Refactor to use MaybeT IO
 demo :: IO ()
 demo = do
     withGEOS $ \ctx -> do
