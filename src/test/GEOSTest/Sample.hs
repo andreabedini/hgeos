@@ -3,8 +3,11 @@
 module GEOSTest.Sample (demo) where
 
 import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.Maybe
 import Data.Geolocation.GEOS
 import Data.List
+import Data.Maybe
 import Data.String.Utils
 import GEOSTest.Arith
 import Paths_hgeos
@@ -15,26 +18,6 @@ type Latitude = Double
 type Longitude = Double
 type Resolution = Double
 
-printGeometry :: Writer -> Geometry -> IO ()
-printGeometry r g = do
-    maybeStr <- writeGeometry r g
-    case maybeStr of
-         Nothing -> putStrLn "(invalid)"
-         (Just str) -> putStrLn str
-
-getXYZs :: CoordinateSequence -> IO (Maybe [Coordinate])
-getXYZs coordSeq = do
-    maybeSize <- getSize coordSeq
-    case maybeSize of
-         Nothing -> return Nothing
-         Just size -> do
-             xyzs <- forM [0..(size - 1)] $ \i -> do
-                 (Just x) <- getX coordSeq i
-                 (Just y) <- getY coordSeq i
-                 (Just z) <- getZ coordSeq i
-                 return (x, y, z)
-             return $ Just xyzs
-
 data Extent = Extent
     { minX :: Double
     , maxX :: Double
@@ -43,6 +26,15 @@ data Extent = Extent
     , minZ :: Double
     , maxZ :: Double
     } deriving Show
+
+getXYZs :: CoordinateSequence -> MaybeT IO [Coordinate]
+getXYZs coordSeq = do
+    size <- MaybeT $ getSize coordSeq
+    forM [0..(size - 1)] $ \i -> do
+        x <- MaybeT $ getX coordSeq i
+        y <- MaybeT $ getY coordSeq i
+        z <- MaybeT $ getZ coordSeq i
+        return (x, y, z)
 
 extent :: [Coordinate] -> Extent
 extent ((x, y, z) : cs) =
@@ -56,8 +48,9 @@ extent ((x, y, z) : cs) =
                     if z' > maxX then z' else maxZ)) (x, x, y, y, z, z) cs
     in Extent minX maxX minY maxY minZ maxZ
 
-mkSquare :: Reader -> Longitude -> Latitude -> Resolution -> IO Geometry
-mkSquare reader longitude latitude resolution = do
+-- TODO: Build polygon using API instead of string parsing
+mkSquare :: Reader -> Longitude -> Latitude -> Resolution -> MaybeT IO Geometry
+mkSquare reader longitude latitude resolution =
     let points = [
             (longitude, latitude),
             (longitude + resolution, latitude),
@@ -66,41 +59,32 @@ mkSquare reader longitude latitude resolution = do
             (longitude, latitude)
             ]
         wkt = printf "POLYGON ((%s))" (intercalate "," (map (\(a, b) -> printf "%f %f" a b) points))
-    (Just g) <- readGeometry reader wkt
-    return g
+    in MaybeT $ readGeometry reader wkt
 
-getGeometries :: Geometry -> IO [Geometry]
-getGeometries geometry = do
-    (Just count) <- getNumGeometries geometry
-    forM [0..(count - 1)] $ \i -> do
-        (Just g) <- getGeometry geometry i
-        return g
+getGeometries :: Geometry -> IO (Maybe [Geometry])
+getGeometries geometry = runMaybeT $ do
+    count <- MaybeT $ getNumGeometries geometry
+    mapM (MaybeT . getGeometry geometry) [0..(count - 1)]
 
-findBiggestPolygon :: Geometry -> IO Geometry
-findBiggestPolygon geometry = do
-    geometries@(g : gs) <- getGeometries geometry
-    a : as <- sequence $ map area geometries
-    let (g', _) = foldr (\p@(_, a') biggest@(_, aBiggest) -> if a' > aBiggest then p else biggest) (g, a) (zip gs as)
-    return g'
+findBiggestPolygon :: Geometry -> IO (Maybe Geometry)
+findBiggestPolygon geometry = runMaybeT $ do
+    gs@(gHead : gTail) <- MaybeT (getGeometries geometry)
+    as@(aHead : aTail) <- mapM (MaybeT . area) gs
+    return $ fst $ foldr
+        (\p'@(_, a') p@(_, a) -> if a' > a then p' else p)
+        (gHead, aHead)
+        (zip gTail aTail)
 
-resolution :: Double
-resolution = 1.0
-
-processPolygon :: String -> Resolution -> Longitude -> Latitude -> Geometry -> IO ()
+processPolygon :: String -> Resolution -> Longitude -> Latitude -> Geometry -> MaybeT IO ()
 processPolygon tableName resolution longitude latitude p = do
+    shell <- MaybeT $ getExteriorRing p
+    coordSeq <- MaybeT $ getCoordSeq shell
+    xyzs <- getXYZs coordSeq
     let pId = polygonId resolution longitude latitude
-    (Just shell) <- getExteriorRing p
-    (Just coordSeq) <- getCoordSeq shell
-    (Just xyzs) <- getXYZs coordSeq
-    forM_ (zip [0..] xyzs) $ \(pointId, (x, y, _)) -> do
-        let s = printf
-                    "INSERT INTO %s (polygon_id, point_id, longitude, latitude) VALUES ('%s', %d, %f, %f);\n"
-                    tableName
-                    pId
-                    (pointId :: Int)
-                    x
-                    y
-        putStr s
+        format :: Int -> Double -> Double -> String
+        format = printf "INSERT INTO %s (polygon_id, point_id, longitude, latitude) VALUES ('%s', %d, %f, %f);\n" tableName pId
+        strs = map (\(pointId, (x, y, _)) -> format pointId x y) (zip [0..] xyzs)
+    lift $ forM_ strs putStr
 
 polygonId :: Resolution -> Longitude -> Latitude -> String
 polygonId resolution longitude latitude = "id_" ++ formatValue longitude ++ "_" ++ formatValue latitude
@@ -108,42 +92,49 @@ polygonId resolution longitude latitude = "id_" ++ formatValue longitude ++ "_" 
         formatValue :: Double -> String
         formatValue = replace "-" "m" . replace "." "_" . (printf "%.2f") . mfloor resolution
 
--- A more involved example of use of API
+generatePolygonMeshSQL :: Context -> String -> Resolution -> MaybeT IO ()
+generatePolygonMeshSQL ctx wkt resolution = do
+    reader <- MaybeT $ mkReader ctx
+    writer <- MaybeT $ mkWriter ctx
+    country <- MaybeT $ readGeometry reader wkt
+    env <- MaybeT $ envelope country
+    shell <- MaybeT $ getExteriorRing env
+    coordSeq <- MaybeT $ getCoordSeq shell
+    xyzs <- getXYZs coordSeq
+
+    lift $ do
+        putStrLn "Shell:"
+        mapM_ print xyzs
+
+    let Extent{..} = extent xyzs
+        mfloorRes = mfloor resolution
+        longitudeBegin = mfloorRes minX
+        longitudeEnd = mfloorRes maxX + resolution
+        latitudeBegin = mfloorRes minY
+        latitudeEnd = mfloorRes maxY + resolution
+
+    lift $ do
+        putStrLn "Longitude and latitude ranges:"
+        putStrLn $ printf "  longitude %f to %f" longitudeBegin longitudeEnd
+        putStrLn $ printf "  latitude %f to %f" latitudeBegin latitudeEnd
+
+    let longitudes = frange longitudeBegin longitudeEnd 1.0
+        latitudes = frange latitudeBegin latitudeEnd 1.0
+    forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
+        square <- mkSquare reader longitude latitude resolution
+        overlap <- MaybeT $ intersection square country
+        isOverlapEmpty <- MaybeT $ isEmpty overlap
+        unless isOverlapEmpty $ do
+            typeId <- MaybeT $ geomTypeId overlap
+            polygon <- case typeId of
+                            MultiPolygon -> MaybeT $ findBiggestPolygon overlap
+                            Polygon -> return overlap
+            processPolygon "TABLE_NAME" resolution longitude latitude polygon
+    return ()
+
 demo :: IO ()
 demo = do
     fileName <- getDataFileName "data/namibia.wkt"
     wkt <- readFile fileName
-    withGEOS $ \ctx -> do
-        (Just reader) <- mkReader ctx
-        (Just writer) <- mkWriter ctx
-        let p = printGeometry writer
-
-        (Just country) <- readGeometry reader wkt
-        (Just env) <- envelope country
-        (Just shell) <- getExteriorRing env
-        (Just coordSeq) <- getCoordSeq shell
-        (Just xyzs) <- getXYZs coordSeq
-        forM_ xyzs $ \(x, y, z) -> print (x, y, z)
-        let Extent{..} = extent xyzs
-            mfloorRes = mfloor resolution
-            longitudeBegin = mfloorRes minX
-            longitudeEnd = mfloorRes maxX + resolution
-            latitudeBegin = mfloorRes minY
-            latitudeEnd = mfloorRes maxY + resolution
-        print longitudeBegin
-        print longitudeEnd
-        print latitudeBegin
-        print latitudeEnd
-        let longitudes = frange longitudeBegin longitudeEnd 1.0
-            latitudes = frange latitudeBegin latitudeEnd 1.0
-        forM_ [(i, j) | i <- longitudes, j <- latitudes] $ \(longitude, latitude) -> do
-            square <- mkSquare reader longitude latitude resolution
-            (Just overlap) <- intersection square country
-            (Just x) <- isEmpty overlap
-            unless x $ do
-                (Just t) <- geomTypeId overlap
-                polygon <- case t of
-                                MultiPolygon -> findBiggestPolygon overlap
-                                Polygon -> return overlap
-                processPolygon "foo" resolution longitude latitude polygon
-    putStrLn "Sample.demo done"
+    result <- withGEOS $ \ctx -> runMaybeT (generatePolygonMeshSQL ctx wkt 1.0)
+    putStrLn $ "Sample.demo: " ++ (maybe "failed" (\_ -> "succeeded") result)
