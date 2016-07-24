@@ -137,4 +137,4 @@ demo = do
     fileName <- getDataFileName "data/namibia.wkt"
     wkt <- readFile fileName
     result <- withGEOS $ \ctx -> runMaybeT (generatePolygonMeshSQL ctx wkt 1.0)
-    putStrLn $ "Sample.demo: " ++ (maybe "failed" (\_ -> "succeeded") result)
+    putStrLn $ "Sample.demo: " ++ (if isJust result then "succeeded" else "failed")
