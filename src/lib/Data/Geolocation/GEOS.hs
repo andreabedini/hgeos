@@ -12,6 +12,8 @@ management of lifetimes of objects such as readers, writers and geometries.
 
 For the low-level FFI bindings, see "Data.Geolocation.GEOS.Imports".
 
+For the monad transformer wrappers, see "Data.Geolocation.GEOS.Trans".
+
 <https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/HighLevelAPI.hs View sample 1>
 
 <https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/Sample.hs View sample 2>

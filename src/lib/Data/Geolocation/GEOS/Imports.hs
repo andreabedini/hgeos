@@ -14,6 +14,8 @@ high-level wrappers do not yet exist.
 
 For the high-level API, see "Data.Geolocation.GEOS".
 
+For the monad transformer wrappers, see "Data.Geolocation.GEOS.Trans".
+
 <https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/LowLevelAPI.hs View sample>
 -}
 
