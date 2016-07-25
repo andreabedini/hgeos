@@ -26,13 +26,13 @@ demo = do
                             putStrLn str
                             putStrLn "LowLevelAPI.demo done"
     where
-        withGEOS :: (GEOSContextHandle_t -> IO a) -> IO a
+        withGEOS :: (GEOSContextHandle -> IO a) -> IO a
         withGEOS = bracket c_initializeGEOSWithHandlers c_finishGEOS_r
-        withWKTReader :: GEOSContextHandle_t -> (GEOSWKTReaderPtr -> IO a) -> IO a
+        withWKTReader :: GEOSContextHandle -> (GEOSWKTReaderPtr -> IO a) -> IO a
         withWKTReader ctx = bracket (c_GEOSWKTReader_create_r ctx) (c_GEOSWKTReader_destroy_r ctx)
-        withWKTWriter :: GEOSContextHandle_t -> (GEOSWKTWriterPtr -> IO a) -> IO a
+        withWKTWriter :: GEOSContextHandle -> (GEOSWKTWriterPtr -> IO a) -> IO a
         withWKTWriter ctx = bracket (c_GEOSWKTWriter_create_r ctx) (c_GEOSWKTWriter_destroy_r ctx)
-        withGeometry :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> CString -> (GEOSGeometryPtr -> IO a) -> IO a
+        withGeometry :: GEOSContextHandle -> GEOSWKTReaderPtr -> CString -> (GEOSGeometryPtr -> IO a) -> IO a
         withGeometry ctx reader wkt =
             bracket
                 (c_GEOSWKTReader_read_r ctx reader wkt)

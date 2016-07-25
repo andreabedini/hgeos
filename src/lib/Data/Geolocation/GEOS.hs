@@ -60,7 +60,7 @@ import Foreign.Storable
 data Context = Context ContextStateRef
 
 data ContextState = ContextState
-    { hCtx :: GEOSContextHandle_t
+    { hCtx :: GEOSContextHandle
     , hReaders :: [GEOSWKTReaderPtr]
     , hWriters :: [GEOSWKTWriterPtr]
     , hGeometries :: [GEOSGeometryPtr]
@@ -104,7 +104,7 @@ area (Geometry sr h) = do
                 value <- peek valuePtr
                 return $ Just (realToFrac value)
 
-checkAndDoNotTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
+checkAndDoNotTrack :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
 checkAndDoNotTrack sr f = do
     ContextState{..} <- readIORef sr
     h <- f hCtx
@@ -112,7 +112,7 @@ checkAndDoNotTrack sr f = do
                 then Nothing
                 else Just $ Geometry sr h
 
-checkAndTrack :: ContextStateRef -> (GEOSContextHandle_t -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
+checkAndTrack :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
 checkAndTrack sr f = do
     ContextState{..} <- readIORef sr
     h <- f hCtx
@@ -166,7 +166,7 @@ getNumGeometries (Geometry sr h) = do
                 then Nothing
                 else Just $ fromIntegral value
 
-getOrdinate :: (GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
+getOrdinate :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
     CoordinateSequence -> Word -> IO (Maybe Double)
 getOrdinate f (CoordinateSequence sr h) index = do
     ContextState{..} <- readIORef sr

@@ -18,7 +18,7 @@ For the high-level API, see "Data.Geolocation.GEOS".
 -}
 
 module Data.Geolocation.GEOS.Imports
-    ( GEOSContextHandle_t ()
+    ( GEOSContextHandle ()
     , GEOSCoordSequencePtr ()
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
@@ -59,8 +59,8 @@ class NullablePtr a where
     -- |Evaluates to @True@ if pointer is null, @False@ otherwise
     isNullPtr :: a -> Bool
 
--- |Wraps @GEOSContextHandle_t@
-newtype GEOSContextHandle_t = GEOSContextHandle_t (Ptr GEOSContextHandle_t)
+-- |Wraps @GEOSContextHandle@
+newtype GEOSContextHandle = GEOSContextHandle (Ptr GEOSContextHandle)
 
 -- |Wraps @GEOSCoordSequence*@
 newtype GEOSCoordSequencePtr = GEOSCoordSequencePtr (Ptr GEOSCoordSequencePtr)
@@ -84,91 +84,91 @@ instance NullablePtr GEOSWKTWriterPtr where
 
 -- |Wraps @GEOSArea_r@
 foreign import ccall "GEOSArea_r"
-    c_GEOSArea_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> Ptr CDouble -> IO CInt
+    c_GEOSArea_r :: GEOSContextHandle -> GEOSGeometryPtr -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_destroy_r@
 foreign import ccall "GEOSCoordSeq_destroy_r"
-    c_GEOSCoordSeq_destroy_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> IO ()
+    c_GEOSCoordSeq_destroy_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> IO ()
 
 -- |Wraps @GEOSCoordSeq_getSize_r@
 foreign import ccall "GEOSCoordSeq_getSize_r"
-    c_GEOSCoordSeq_getSize_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> Ptr CUInt -> IO CInt
+    c_GEOSCoordSeq_getSize_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> Ptr CUInt -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_getX_r@
 foreign import ccall "GEOSCoordSeq_getX_r"
-    c_GEOSCoordSeq_getX_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+    c_GEOSCoordSeq_getX_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_getY_r@
 foreign import ccall "GEOSCoordSeq_getY_r"
-    c_GEOSCoordSeq_getY_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+    c_GEOSCoordSeq_getY_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_getZ_r@
 foreign import ccall "GEOSCoordSeq_getZ_r"
-    c_GEOSCoordSeq_getZ_r :: GEOSContextHandle_t -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+    c_GEOSCoordSeq_getZ_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSEnvelope_r@
 foreign import ccall "GEOSEnvelope_r"
-    c_GEOSEnvelope_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+    c_GEOSEnvelope_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSFree_r@ specialized to @const char*@
 foreign import ccall "GEOSFree_r"
-    c_GEOSFree_r_CString :: GEOSContextHandle_t -> CString -> IO ()
+    c_GEOSFree_r_CString :: GEOSContextHandle -> CString -> IO ()
 
 -- |Wraps @GEOSGeomTypeId_r@
 foreign import ccall "GEOSGeomTypeId_r"
-    c_GEOSGeomTypeId_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO CInt
+    c_GEOSGeomTypeId_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO CInt
 
 -- |Wraps @GEOSGeom_destroy_r@
 foreign import ccall "GEOSGeom_destroy_r"
-    c_GEOSGeom_destroy_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO ()
+    c_GEOSGeom_destroy_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO ()
 
 -- |Wraps @GEOSGeom_getCoordSeq_r@
 foreign import ccall "GEOSGeom_getCoordSeq_r"
-    c_GEOSGeom_getCoordSeq_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSCoordSequencePtr
+    c_GEOSGeom_getCoordSeq_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO GEOSCoordSequencePtr
 
 -- |Wraps @GEOSGetExteriorRing_r@
 foreign import ccall "GEOSGetExteriorRing_r"
-    c_GEOSGetExteriorRing_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+    c_GEOSGetExteriorRing_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSGetGeometryN_r@
 foreign import ccall "GEOSGetGeometryN_r"
-    c_GEOSGetGeometryN_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> CInt -> IO GEOSGeometryPtr
+    c_GEOSGetGeometryN_r :: GEOSContextHandle -> GEOSGeometryPtr -> CInt -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSGetNumGeometries_r@
 foreign import ccall "GEOSGetNumGeometries_r"
-    c_GEOSGetNumGeometries_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO CInt
+    c_GEOSGetNumGeometries_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO CInt
 
 -- |Wraps @GEOSIntersection_r@
 foreign import ccall "GEOSIntersection_r"
-    c_GEOSIntersection_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
+    c_GEOSIntersection_r :: GEOSContextHandle -> GEOSGeometryPtr -> GEOSGeometryPtr -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSWKTReader_create_r@
 foreign import ccall "GEOSWKTReader_create_r"
-    c_GEOSWKTReader_create_r :: GEOSContextHandle_t -> IO GEOSWKTReaderPtr
+    c_GEOSWKTReader_create_r :: GEOSContextHandle -> IO GEOSWKTReaderPtr
 
 -- |Wraps @GEOSWKTReader_destroy_r@
 foreign import ccall "GEOSWKTReader_destroy_r"
-    c_GEOSWKTReader_destroy_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> IO ()
+    c_GEOSWKTReader_destroy_r :: GEOSContextHandle -> GEOSWKTReaderPtr -> IO ()
 
 -- |Wraps @GEOSWKTReader_read_r@
 foreign import ccall "GEOSWKTReader_read_r"
-    c_GEOSWKTReader_read_r :: GEOSContextHandle_t -> GEOSWKTReaderPtr -> CString -> IO GEOSGeometryPtr
+    c_GEOSWKTReader_read_r :: GEOSContextHandle -> GEOSWKTReaderPtr -> CString -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSWKTWriter_create_r@
 foreign import ccall "GEOSWKTWriter_create_r"
-    c_GEOSWKTWriter_create_r :: GEOSContextHandle_t -> IO GEOSWKTWriterPtr
+    c_GEOSWKTWriter_create_r :: GEOSContextHandle -> IO GEOSWKTWriterPtr
 
 -- |Wraps @GEOSWKTWriter_destroy_r@
 foreign import ccall "GEOSWKTWriter_destroy_r"
-    c_GEOSWKTWriter_destroy_r :: GEOSContextHandle_t -> GEOSWKTWriterPtr -> IO ()
+    c_GEOSWKTWriter_destroy_r :: GEOSContextHandle -> GEOSWKTWriterPtr -> IO ()
 
 -- |Wraps @GEOSWKTWriter_write_r@
 foreign import ccall "GEOSWKTWriter_write_r"
-    c_GEOSWKTWriter_write_r :: GEOSContextHandle_t -> GEOSWKTWriterPtr -> GEOSGeometryPtr -> IO CString
+    c_GEOSWKTWriter_write_r :: GEOSContextHandle -> GEOSWKTWriterPtr -> GEOSGeometryPtr -> IO CString
 
 -- |Wraps @GEOSisEmpty_r@
 foreign import ccall "GEOSisEmpty_r"
-    c_GEOSisEmpty_r :: GEOSContextHandle_t -> GEOSGeometryPtr -> IO CChar
+    c_GEOSisEmpty_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO CChar
 
 -- |Wraps @GEOSversion@
 foreign import ccall "GEOSversion"
@@ -176,7 +176,7 @@ foreign import ccall "GEOSversion"
 
 -- |Wraps @finishGEOS_r@
 foreign import ccall "finishGEOS_r"
-    c_finishGEOS_r :: GEOSContextHandle_t -> IO ()
+    c_finishGEOS_r :: GEOSContextHandle -> IO ()
 
 -- |Wraps @getErrorMessage@ helper function
 foreign import ccall "helpers.h getErrorMessage"
@@ -188,4 +188,4 @@ foreign import ccall "helpers.h getNoticeMessage"
 
 -- |Wraps @initializeGEOSWithHandlers@ helper function
 foreign import ccall "helpers.h initializeGEOSWithHandlers"
-    c_initializeGEOSWithHandlers :: IO GEOSContextHandle_t
+    c_initializeGEOSWithHandlers :: IO GEOSContextHandle
