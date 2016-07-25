@@ -56,7 +56,7 @@ import Foreign.Ptr
 
 -- |Determines if given pointer is null
 class NullablePtr a where
-    -- |Returns @True@ if pointer is null, @False@ otherwise
+    -- |Evaluates to @True@ if pointer is null, @False@ otherwise
     isNullPtr :: a -> Bool
 
 -- |Wraps @GEOSContextHandle_t@
@@ -174,7 +174,7 @@ foreign import ccall "GEOSisEmpty_r"
 foreign import ccall "GEOSversion"
     c_GEOSversion :: IO CString
 
--- |Wraps @finishGEOS_r@ helper function
+-- |Wraps @finishGEOS_r@
 foreign import ccall "finishGEOS_r"
     c_finishGEOS_r :: GEOSContextHandle_t -> IO ()
 
