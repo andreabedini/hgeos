@@ -1,4 +1,10 @@
-# vNext
+# v0.1.4.0
+
+* Fixes some documentation issues
+* Adds MaybeT-based API and samples
+* Renames GEOSContextHandle_t to GEOSContextHandle
+
+# v0.1.3.0
 
 * Rearranges test sources
 * Adds proper handling to high-level API
