@@ -35,6 +35,7 @@ module Data.Geolocation.GEOS.Trans
     , mkWriterM
     , readGeometryM
     , runGEOS
+    , runGEOSEither
     , writeGeometryM
     ) where
 
@@ -124,6 +125,28 @@ readGeometryM = binaryGEOSFunc readGeometry
 -- @
 runGEOS :: (Context -> MaybeT IO a) -> IO (Maybe a)
 runGEOS = withGEOS . (runMaybeT .)
+
+-- |Creates a <https://trac.osgeo.org/geos/ GEOS> context, passes it to a block
+-- and releases the context and all associated objects such as readers, writers
+-- and geometries at the end inside a @MaybeT IO@ monad returning a message in
+-- case of error:
+--
+-- @
+--    result <- runGEOSEither $ \ctx -> do
+--
+--        -- Use context
+--
+--        return ()
+--    case result of
+--          Left m -> putStrLn $ "Failed: " ++ m
+--          Right r -> putStrLn $ "Succeeded: " ++ show r
+-- @
+runGEOSEither :: (Context -> MaybeT IO a) -> IO (Either String a)
+runGEOSEither action = do
+    result <- runGEOS action
+    case result of
+         Nothing -> Left <$> getErrorMessage
+         Just r -> return $ Right r
 
 -- | @MaybeT@-wrapped version of 'area'
 writeGeometryM :: Writer -> Geometry -> MaybeT IO String

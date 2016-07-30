@@ -1,3 +1,7 @@
+# v0.1.5.0
+
+* Adds runGEOSEither
+
 # v0.1.4.0
 
 * Fixes some documentation issues

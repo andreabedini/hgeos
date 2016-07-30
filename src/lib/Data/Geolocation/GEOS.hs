@@ -32,6 +32,7 @@ module Data.Geolocation.GEOS
     , envelope
     , geomTypeId
     , getCoordSeq
+    , getErrorMessage
     , getExteriorRing
     , getGeometry
     , getNumGeometries
@@ -147,6 +148,10 @@ getCoordSeq (Geometry sr hGeometry) = do
     return $ if isNullPtr h
                 then Nothing
                 else Just $ CoordinateSequence sr h
+
+-- |Returns message in case of error
+getErrorMessage :: IO String
+getErrorMessage = c_getErrorMessage >>= peekCString
 
 -- |Returns a 'Geometry' instance representing the exterior ring of the
 -- supplied 'Geometry'

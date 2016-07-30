@@ -50,6 +50,7 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSisEmpty_r
     , c_GEOSversion
     , c_finishGEOS_r
+    , c_getErrorMessage
     , c_initializeGEOSWithHandlers
     ) where
 
