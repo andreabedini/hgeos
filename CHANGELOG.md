@@ -1,3 +1,8 @@
+# vNext
+
+* Improves Windows build support by including binary distribution of GEOS
+* Embeds GEOS 3.5.0-1 on Windows
+
 # v0.1.5.0
 
 * Adds runGEOSEither
