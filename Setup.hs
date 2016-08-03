@@ -14,30 +14,28 @@ module Main (main) where
 
 #ifdef mingw32_HOST_OS
 
+import Data.List
 import Distribution.PackageDescription
-    ( GenericPackageDescription
-    , HookedBuildInfo
-    , extraLibDirs
-    , includeDirs
-    , libBuildInfo
-    , library
-    )
 import Distribution.Simple
-    ( confHook
-    , defaultMainWithHooks
-    , simpleUserHooks
-    )
 import Distribution.Simple.LocalBuildInfo
-    ( LocalBuildInfo
-    , configFlags
-    , localPkgDescr
-    )
-import Distribution.Simple.Setup (ConfigFlags)
-import System.Directory (getCurrentDirectory)
-import System.FilePath ((</>))
+import Distribution.Simple.Setup
+import System.Directory
+import System.FilePath
+
+testPrefix :: String
+testPrefix = "test:"
+
+dllName :: String
+dllName = "geos_c.dll"
 
 main :: IO ()
-main = defaultMainWithHooks simpleUserHooks { confHook = hgeosConfHook }
+main = defaultMainWithHooks hgeosHooks
+
+hgeosHooks :: UserHooks
+hgeosHooks = simpleUserHooks
+    { confHook = hgeosConfHook
+    , postBuild = hgeosPostBuild
+    }
 
 hgeosConfHook :: (GenericPackageDescription, HookedBuildInfo) -> ConfigFlags -> IO LocalBuildInfo
 hgeosConfHook (description, buildInfo) flags = do
@@ -62,6 +60,20 @@ hgeosConfHook (description, buildInfo) flags = do
             }
         }
     }
+
+hgeosPostBuild :: Args -> BuildFlags -> PackageDescription -> LocalBuildInfo -> IO ()
+hgeosPostBuild args buildFlags _ _ = do
+    case find (testPrefix `isPrefixOf`) args of
+         Nothing -> return ()
+         Just testArg -> do
+                dir <- getCurrentDirectory
+                let testName = drop (length testPrefix) testArg
+                    distDir = dir </> (fromFlag $ buildDistPref buildFlags)
+                    buildDir = distDir </> "build"
+                    testDLLPath = buildDir </> testName </> dllName
+                    geosDLLPath = dir </> "external" </> "geos" </> "bin" </> dllName
+                copyFile geosDLLPath testDLLPath
+                return ()
 
 #else
 
