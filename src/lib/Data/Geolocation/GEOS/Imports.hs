@@ -5,7 +5,7 @@ Copyright   : (C) Richard Cook, 2016
 Licence     : MIT
 Maintainer  : rcook@rcook.org
 Stability   : experimental
-Portability : POSIX
+Portability : portable
 
 These are low-level FFI bindings for the GEOS C API derived from
 <http://geos.osgeo.org/doxygen/geos__c_8h_source.html geos_c.h>. These enable

@@ -5,7 +5,7 @@ Copyright   : (C) Richard Cook, 2016
 Licence     : MIT
 Maintainer  : rcook@rcook.org
 Stability   : experimental
-Portability : POSIX
+Portability : portable
 
 A high-level API for interoperating with GEOS C API which includes automatic
 management of lifetimes of objects such as readers, writers and geometries.

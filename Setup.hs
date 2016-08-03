@@ -5,7 +5,7 @@ Copyright   : (C) Richard Cook, 2016
 Licence     : MIT
 Maintainer  : rcook@rcook.org
 Stability   : experimental
-Portability : POSIX
+Portability : portable
 -}
 
 {-# LANGUAGE CPP #-}
