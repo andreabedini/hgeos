@@ -13,7 +13,7 @@ author:               Richard Cook <rcook@rcook.org>
 maintainer:           Richard Cook <rcook@rcook.org>
 copyright:            (C) 2016 Richard Cook
 category:             Data, Geography, Geometry, Text
-build-type:           Simple
+build-type:           Custom
 cabal-version:        >= 1.10
 data-files:           data/namibia.wkt
 
@@ -28,14 +28,10 @@ library
                     , transformers
   extra-libraries:    geos_c
   c-sources:          src/lib/Data/Geolocation/GEOS/helpers.c
-                    , src/lib/Data/Geolocation/GEOS/helpers.h
   cc-options:         -std=c99 -pthread
   exposed-modules:    Data.Geolocation.GEOS
                     , Data.Geolocation.GEOS.Imports
                     , Data.Geolocation.GEOS.Trans
-  if os(windows)
-    include-dirs:     C:/OSGeo4W64/include
-    extra-lib-dirs:   C:/OSGeo4W64/lib
 
 test-suite hgeos-app
   type:               exitcode-stdio-1.0
