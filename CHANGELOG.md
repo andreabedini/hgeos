@@ -1,4 +1,4 @@
-# vNext
+# v0.1.5.1
 
 * Improves Windows build support by including binary distribution of GEOS
 * Embeds GEOS 3.5.0-1 on Windows
