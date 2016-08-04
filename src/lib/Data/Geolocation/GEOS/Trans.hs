@@ -19,6 +19,7 @@ For the high-level API, see "Data.Geolocation.GEOS".
 
 module Data.Geolocation.GEOS.Trans
     ( areaM
+    , createCoordSeqM
     , envelopeM
     , geomTypeIdM
     , getCoordSeqM
@@ -48,9 +49,16 @@ unaryGEOSFunc = (MaybeT .)
 binaryGEOSFunc :: (a -> b -> IO (Maybe c)) -> a -> b -> MaybeT IO c
 binaryGEOSFunc f a b = MaybeT (f a b)
 
+ternaryGEOSFunc :: (a -> b -> c -> IO (Maybe d)) -> a -> b -> c -> MaybeT IO d
+ternaryGEOSFunc f a b c = MaybeT (f a b c)
+
 -- | @MaybeT@-wrapped version of 'area'
 areaM :: Geometry -> MaybeT IO Double
 areaM = unaryGEOSFunc area
+
+-- | @MaybeT@-wrapped version of 'createCoordSeq'
+createCoordSeqM :: Context -> Word -> Word -> MaybeT IO CoordinateSequence
+createCoordSeqM = ternaryGEOSFunc createCoordSeq
 
 -- | @MaybeT@-wrapped version of 'envelope'
 envelopeM :: Geometry -> MaybeT IO Geometry

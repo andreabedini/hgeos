@@ -29,6 +29,7 @@ module Data.Geolocation.GEOS
     , Reader ()
     , Writer ()
     , area
+    , createCoordSeq
     , envelope
     , geomTypeId
     , getCoordSeq
@@ -136,6 +137,15 @@ checkAndTrackGeometry sr create = checkAndTrack sr create c_GEOSGeom_destroy_r G
 
 emptyDeleteAction :: DeleteAction
 emptyDeleteAction = DeleteAction (ptrToIntPtr nullPtr) (return ())
+
+-- |Creates an empty 'CoordinateSequence' instance
+createCoordSeq :: Context -> Word -> Word -> IO (Maybe CoordinateSequence)
+createCoordSeq (Context sr) size dims =
+    checkAndTrack
+        sr
+        (\hCtx -> c_GEOSCoordSeq_create_r hCtx (fromIntegral size) (fromIntegral dims))
+        c_GEOSCoordSeq_destroy_r
+        CoordinateSequence
 
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'

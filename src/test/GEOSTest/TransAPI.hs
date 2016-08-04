@@ -17,5 +17,6 @@ demo = do
         g2 <- intersectionM g0 g1
         writer <- mkWriterM ctx
         str <- writeGeometryM writer g2
+        coords <- createCoordSeqM ctx 100 2
         lift $ putStrLn str
     putStrLn $ "TransAPI.demo: " ++ (if isJust result then "succeeded" else "failed")

@@ -1,6 +1,7 @@
 # vNext
 
 * Internal refactorings
+* Add createCoordSeq et al
 
 # v0.1.5.1
 
