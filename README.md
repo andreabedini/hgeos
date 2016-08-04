@@ -1,9 +1,9 @@
-# hgeos
+# hgeos [![Hackage](https://img.shields.io/hackage/v/hgeos.svg?maxAge=2592000)](http://hackage.haskell.org/package/hgeos)
 
 Simple Haskell bindings to the [GEOS][geos] [C API][capi] heavily inspired by
 [Django GEOS bindings][django-gis]
 
-Documentation is available on [Hackage][hackage]:
+Documentation is available on Hackage:
 
 * [`Data.Geolocation.GEOS`][data-geolocation-geos]
 * [`Data.Geolocation.GEOS.Imports`][data-geolocation-geos-imports]
@@ -50,7 +50,6 @@ Copyright (c) 2016 Richard Cook
 [data-geolocation-geos-imports]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS-Imports.html
 [django-gis]: https://github.com/django/django/tree/master/django/contrib/gis/geos
 [geos]: https://trac.osgeo.org/geos/
-[hackage]: http://hackage.haskell.org/
 [homebrew]: http://brew.sh/
 [stack]: https://haskellstack.org/
 [windows-quick-start]: https://trac.osgeo.org/osgeo4w/
