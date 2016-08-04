@@ -18,4 +18,5 @@ demo = do
         writer <- MaybeT $ mkWriter ctx
         str <- MaybeT $ writeGeometry writer g2
         lift $ putStrLn str
-    putStrLn $ "HighLevelAPI.demo: " ++ (if isJust result then "succeeded" else "failed")
+
+    putStrLn $ "HighLevelAPI.demo: " ++ (if isJust result then "succeeded" else error "HighLevelAPI.demo failed")

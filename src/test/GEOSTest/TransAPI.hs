@@ -31,4 +31,4 @@ demo = do
         str1 <- writeGeometryM writer g3
         lift $ putStrLn str1
 
-    putStrLn $ "TransAPI.demo: " ++ (if isJust result then "succeeded" else "failed")
+    putStrLn $ "TransAPI.demo: " ++ (if isJust result then "succeeded" else error "TransAPI.demo failed")
