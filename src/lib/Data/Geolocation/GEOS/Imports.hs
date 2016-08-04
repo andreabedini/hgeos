@@ -27,6 +27,7 @@ module Data.Geolocation.GEOS.Imports
     , GEOSWKTWriterPtr ()
     , NullablePtr (isNullPtr, rawIntPtr)
     , c_GEOSArea_r
+    , c_GEOSCoordSeq_create_r
     , c_GEOSCoordSeq_destroy_r
     , c_GEOSCoordSeq_getSize_r
     , c_GEOSCoordSeq_getX_r
@@ -93,6 +94,10 @@ instance NullablePtr GEOSWKTWriterPtr where
 -- |Wraps @GEOSArea_r@
 foreign import ccall "GEOSArea_r"
     c_GEOSArea_r :: GEOSContextHandle -> GEOSGeometryPtr -> Ptr CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_create_r@
+foreign import ccall "GEOSCoordSeq_create_r"
+    c_GEOSCoordSeq_create_r :: GEOSContextHandle -> CUInt -> CUInt -> IO GEOSCoordSequencePtr
 
 -- |Wraps @GEOSCoordSeq_destroy_r@
 foreign import ccall "GEOSCoordSeq_destroy_r"
