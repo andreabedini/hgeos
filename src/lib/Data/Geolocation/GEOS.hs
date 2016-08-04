@@ -51,6 +51,7 @@ module Data.Geolocation.GEOS
     ) where
 
 import Control.Exception
+import Control.Monad
 import Data.Geolocation.GEOS.Imports
 import Data.IORef
 import Data.Word
@@ -70,9 +71,9 @@ data ContextState = ContextState
 type ContextStateRef = IORef ContextState
 
 -- |References a <https://trac.osgeo.org/geos/ GEOS> coordinate sequence
-data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
+data CoordinateSequence = CoordinateSequence ContextStateRef DeleteAction GEOSCoordSequencePtr
 
-type DeleteAction = IO ()
+data DeleteAction = DeleteAction IntPtr (IO ())
 
 -- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry type ID
 data GeometryType =
@@ -86,17 +87,17 @@ data GeometryType =
     GeometryCollection deriving (Enum, Show)
 
 -- |References a <https://en.wikipedia.org/wiki/Well-known_text WKT> reader
-data Reader = Reader ContextStateRef GEOSWKTReaderPtr
+data Reader = Reader ContextStateRef DeleteAction GEOSWKTReaderPtr
 
 -- |References a <https://en.wikipedia.org/wiki/Well-known_text WKT> writer
-data Writer = Writer ContextStateRef GEOSWKTWriterPtr
+data Writer = Writer ContextStateRef DeleteAction GEOSWKTWriterPtr
 
 -- |References a <https://trac.osgeo.org/geos/ GEOS> geometry
-data Geometry = Geometry ContextStateRef GEOSGeometryPtr
+data Geometry = Geometry ContextStateRef DeleteAction GEOSGeometryPtr
 
 -- |Returns area of a 'Geometry' instance
 area :: Geometry -> IO (Maybe Double)
-area (Geometry sr h) = do
+area (Geometry sr _ h) = do
     ContextState{..} <- readIORef sr
     alloca $ \valuePtr -> do
         status <- c_GEOSArea_r hCtx h valuePtr
@@ -112,13 +113,13 @@ checkAndDoNotTrack sr f = do
     h <- f hCtx
     return $ if isNullPtr h
                 then Nothing
-                else Just $ Geometry sr h
+                else Just $ Geometry sr emptyDeleteAction h
 
 checkAndTrack :: NullablePtr a =>
     ContextStateRef ->
     (GEOSContextHandle -> IO a) ->
     (GEOSContextHandle -> a -> IO ()) ->
-    (ContextStateRef -> a -> b) ->
+    (ContextStateRef -> DeleteAction -> a -> b) ->
     IO (Maybe b)
 checkAndTrack sr create destroy wrap = do
     ContextState{..} <- readIORef sr
@@ -126,22 +127,25 @@ checkAndTrack sr create destroy wrap = do
     if isNullPtr h
     then return Nothing
     else do
-        let deleteAction = destroy hCtx h
+        let deleteAction = DeleteAction (rawIntPtr h) (destroy hCtx h)
         modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
-        return $ Just (wrap sr h)
+        return $ Just (wrap sr deleteAction h)
 
 checkAndTrackGeometry :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
 checkAndTrackGeometry sr create = checkAndTrack sr create c_GEOSGeom_destroy_r Geometry
 
+emptyDeleteAction :: DeleteAction
+emptyDeleteAction = DeleteAction (ptrToIntPtr nullPtr) (return ())
+
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
 envelope :: Geometry -> IO (Maybe Geometry)
-envelope (Geometry sr h) =
+envelope (Geometry sr _ h) =
     checkAndTrackGeometry sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
 
 -- |Returns type of a 'Geometry' instance
 geomTypeId :: Geometry -> IO (Maybe GeometryType)
-geomTypeId (Geometry sr h) = do
+geomTypeId (Geometry sr _ h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGeomTypeId_r hCtx h
     return $ if value == -1
@@ -150,12 +154,12 @@ geomTypeId (Geometry sr h) = do
 
 -- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
 getCoordSeq :: Geometry -> IO (Maybe CoordinateSequence)
-getCoordSeq (Geometry sr hGeometry) = do
+getCoordSeq (Geometry sr _ hGeometry) = do
     ContextState{..} <- readIORef sr
     h <- c_GEOSGeom_getCoordSeq_r hCtx hGeometry
     return $ if isNullPtr h
                 then Nothing
-                else Just $ CoordinateSequence sr h
+                else Just $ CoordinateSequence sr emptyDeleteAction h
 
 -- |Returns message in case of error
 getErrorMessage :: IO String
@@ -164,17 +168,17 @@ getErrorMessage = c_getErrorMessage >>= peekCString
 -- |Returns a 'Geometry' instance representing the exterior ring of the
 -- supplied 'Geometry'
 getExteriorRing :: Geometry -> IO (Maybe Geometry)
-getExteriorRing (Geometry sr h) =
+getExteriorRing (Geometry sr _ h) =
     checkAndDoNotTrack sr (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
 
 -- |Returns child 'Geometry' at given index
 getGeometry :: Geometry -> Int -> IO (Maybe Geometry)
-getGeometry (Geometry sr h) index =
+getGeometry (Geometry sr _ h) index =
     checkAndDoNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral index))
 
 -- |Gets the number of geometries in a 'Geometry' instance
 getNumGeometries :: Geometry -> IO (Maybe Int)
-getNumGeometries (Geometry sr h) = do
+getNumGeometries (Geometry sr _ h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSGetNumGeometries_r hCtx h
     return $ if value == -1
@@ -183,7 +187,7 @@ getNumGeometries (Geometry sr h) = do
 
 getOrdinate :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
     CoordinateSequence -> Word -> IO (Maybe Double)
-getOrdinate f (CoordinateSequence sr h) index = do
+getOrdinate f (CoordinateSequence sr _ h) index = do
     ContextState{..} <- readIORef sr
     alloca $ \valuePtr -> do
         status <- f hCtx h (fromIntegral index) valuePtr
@@ -195,7 +199,7 @@ getOrdinate f (CoordinateSequence sr h) index = do
 
 -- |Gets the size from a coordinate sequence
 getSize :: CoordinateSequence -> IO (Maybe Word)
-getSize (CoordinateSequence sr h) = do
+getSize (CoordinateSequence sr _ h) = do
     ContextState{..} <- readIORef sr
     alloca $ \sizePtr -> do
         status <- c_GEOSCoordSeq_getSize_r hCtx h sizePtr
@@ -220,12 +224,12 @@ getZ = getOrdinate c_GEOSCoordSeq_getZ_r
 -- |Returns a 'Geometry' instance representing the intersection of the two
 -- supplied 'Geometry' instances:
 intersection :: Geometry -> Geometry -> IO (Maybe Geometry)
-intersection (Geometry sr0 h0) (Geometry sr1 h1) =
+intersection (Geometry sr0 _ h0) (Geometry sr1 _ h1) =
     checkAndTrackGeometry sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
 
 -- |Returns value indicating if specified 'Geometry' instance is empty
 isEmpty :: Geometry -> IO (Maybe Bool)
-isEmpty (Geometry sr h) = do
+isEmpty (Geometry sr _ h) = do
     ContextState{..} <- readIORef sr
     value <- c_GEOSisEmpty_r hCtx h
     return $ case value of
@@ -252,13 +256,13 @@ mkWriter (Context sr) = checkAndTrack sr c_GEOSWKTWriter_create_r c_GEOSWKTWrite
 -- |Deserializes a 'Geometry' instance from the given 'String' using the
 -- supplied 'Reader':
 readGeometry :: Reader -> String -> IO (Maybe Geometry)
-readGeometry (Reader sr h) str = withCString str $ \cs -> do
+readGeometry (Reader sr _ h) str = withCString str $ \cs -> do
     checkAndTrackGeometry sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
 
 releaseContext :: Context -> IO ()
 releaseContext (Context sr) = do
     ContextState{..} <- readIORef sr
-    sequence_ deleteActions
+    mapM_ (\(DeleteAction _ f) -> f) deleteActions
     c_finishGEOS_r hCtx
 
 -- |Reports version of GEOS API
@@ -281,7 +285,7 @@ withGEOS = bracket mkContext releaseContext
 
 -- |Serializes a 'Geometry' instance to a 'String' using the supplied 'Writer':
 writeGeometry :: Writer -> Geometry -> IO (Maybe String)
-writeGeometry (Writer sr hWriter) (Geometry _ hGeometry) = do
+writeGeometry (Writer sr _ hWriter) (Geometry _ _ hGeometry) = do
     ContextState{..} <- readIORef sr
     bracket
         (c_GEOSWKTWriter_write_r hCtx hWriter hGeometry)

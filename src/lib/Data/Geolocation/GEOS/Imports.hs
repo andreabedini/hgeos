@@ -25,7 +25,7 @@ module Data.Geolocation.GEOS.Imports
     , GEOSGeometryPtr ()
     , GEOSWKTReaderPtr ()
     , GEOSWKTWriterPtr ()
-    , NullablePtr (isNullPtr)
+    , NullablePtr (isNullPtr, rawIntPtr)
     , c_GEOSArea_r
     , c_GEOSCoordSeq_destroy_r
     , c_GEOSCoordSeq_getSize_r
@@ -61,6 +61,7 @@ import Foreign.Ptr
 class NullablePtr a where
     -- |Evaluates to @True@ if pointer is null, @False@ otherwise
     isNullPtr :: a -> Bool
+    rawIntPtr :: a -> IntPtr
 
 -- |Wraps @GEOSContextHandle@
 newtype GEOSContextHandle = GEOSContextHandle (Ptr GEOSContextHandle)
@@ -69,21 +70,25 @@ newtype GEOSContextHandle = GEOSContextHandle (Ptr GEOSContextHandle)
 newtype GEOSCoordSequencePtr = GEOSCoordSequencePtr (Ptr GEOSCoordSequencePtr)
 instance NullablePtr GEOSCoordSequencePtr where
     isNullPtr (GEOSCoordSequencePtr p) = p == nullPtr
+    rawIntPtr (GEOSCoordSequencePtr p) = ptrToIntPtr p
 
 -- |Wraps @GEOSGeometry*@
 newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr)
 instance NullablePtr GEOSGeometryPtr where
     isNullPtr (GEOSGeometryPtr p) = p == nullPtr
+    rawIntPtr (GEOSGeometryPtr p) = ptrToIntPtr p
 
 -- |Wraps @GEOSWKTReader*@
 newtype GEOSWKTReaderPtr = GEOSWKTReaderPtr (Ptr GEOSWKTReaderPtr)
 instance NullablePtr GEOSWKTReaderPtr where
     isNullPtr (GEOSWKTReaderPtr p) = p == nullPtr
+    rawIntPtr (GEOSWKTReaderPtr p) = ptrToIntPtr p
 
 -- |Wraps @GEOSWKTWriter*@
 newtype GEOSWKTWriterPtr = GEOSWKTWriterPtr (Ptr GEOSWKTWriterPtr)
 instance NullablePtr GEOSWKTWriterPtr where
     isNullPtr (GEOSWKTWriterPtr p) = p == nullPtr
+    rawIntPtr (GEOSWKTWriterPtr p) = ptrToIntPtr p
 
 -- |Wraps @GEOSArea_r@
 foreign import ccall "GEOSArea_r"
