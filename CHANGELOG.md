@@ -1,3 +1,7 @@
+# vNext
+
+* Internal refactorings
+
 # v0.1.5.1
 
 * Improves Windows build support by including binary distribution of GEOS
