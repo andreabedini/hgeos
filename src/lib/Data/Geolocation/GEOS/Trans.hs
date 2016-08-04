@@ -52,71 +52,71 @@ binaryGEOSFunc f a b = MaybeT (f a b)
 ternaryGEOSFunc :: (a -> b -> c -> IO (Maybe d)) -> a -> b -> c -> MaybeT IO d
 ternaryGEOSFunc f a b c = MaybeT (f a b c)
 
--- | @MaybeT@-wrapped version of 'area'
+-- |@MaybeT@-wrapped version of 'area'
 areaM :: Geometry -> MaybeT IO Double
 areaM = unaryGEOSFunc area
 
--- | @MaybeT@-wrapped version of 'createCoordSeq'
+-- |@MaybeT@-wrapped version of 'createCoordSeq'
 createCoordSeqM :: Context -> Word -> Word -> MaybeT IO CoordinateSequence
 createCoordSeqM = ternaryGEOSFunc createCoordSeq
 
--- | @MaybeT@-wrapped version of 'envelope'
+-- |@MaybeT@-wrapped version of 'envelope'
 envelopeM :: Geometry -> MaybeT IO Geometry
 envelopeM = unaryGEOSFunc envelope
 
--- | @MaybeT@-wrapped version of 'geomTypeId'
+-- |@MaybeT@-wrapped version of 'geomTypeId'
 geomTypeIdM :: Geometry -> MaybeT IO GeometryType
 geomTypeIdM = unaryGEOSFunc geomTypeId
 
--- | @MaybeT@-wrapped version of 'getCoordSeq'
+-- |@MaybeT@-wrapped version of 'getCoordSeq'
 getCoordSeqM :: Geometry -> MaybeT IO CoordinateSequence
 getCoordSeqM = unaryGEOSFunc getCoordSeq
 
--- | @MaybeT@-wrapped version of 'getExteriorRing'
+-- |@MaybeT@-wrapped version of 'getExteriorRing'
 getExteriorRingM :: Geometry -> MaybeT IO Geometry
 getExteriorRingM = unaryGEOSFunc getExteriorRing
 
--- | @MaybeT@-wrapped version of 'getGeometry'
+-- |@MaybeT@-wrapped version of 'getGeometry'
 getGeometryM :: Geometry -> Int -> MaybeT IO Geometry
 getGeometryM = binaryGEOSFunc getGeometry
 
--- | @MaybeT@-wrapped version of 'getNumGeometries'
+-- |@MaybeT@-wrapped version of 'getNumGeometries'
 getNumGeometriesM :: Geometry -> MaybeT IO Int
 getNumGeometriesM = unaryGEOSFunc getNumGeometries
 
--- | @MaybeT@-wrapped version of 'getSize'
+-- |@MaybeT@-wrapped version of 'getSize'
 getSizeM :: CoordinateSequence -> MaybeT IO Word
 getSizeM = unaryGEOSFunc getSize
 
--- | @MaybeT@-wrapped version of 'getX'
+-- |@MaybeT@-wrapped version of 'getX'
 getXM :: CoordinateSequence -> Word -> MaybeT IO Double
 getXM = binaryGEOSFunc getX
 
--- | @MaybeT@-wrapped version of 'getY'
+-- |@MaybeT@-wrapped version of 'getY'
 getYM :: CoordinateSequence -> Word -> MaybeT IO Double
 getYM = binaryGEOSFunc getY
 
--- | @MaybeT@-wrapped version of 'getZ'
+-- |@MaybeT@-wrapped version of 'getZ'
 getZM :: CoordinateSequence -> Word -> MaybeT IO Double
 getZM = binaryGEOSFunc getZ
 
--- | @MaybeT@-wrapped version of 'intersection'
+-- |@MaybeT@-wrapped version of 'intersection'
 intersectionM :: Geometry -> Geometry -> MaybeT IO Geometry
 intersectionM = binaryGEOSFunc intersection
 
--- | @MaybeT@-wrapped version of 'isEmpty'
+-- |@MaybeT@-wrapped version of 'isEmpty'
 isEmptyM :: Geometry -> MaybeT IO Bool
 isEmptyM = unaryGEOSFunc isEmpty
 
--- | @MaybeT@-wrapped version of 'mkReader'
+-- |@MaybeT@-wrapped version of 'mkReader'
 mkReaderM :: Context -> MaybeT IO Reader
 mkReaderM = unaryGEOSFunc mkReader
 
--- | @MaybeT@-wrapped version of 'mkWriter'
+-- |@MaybeT@-wrapped version of 'mkWriter'
 mkWriterM :: Context -> MaybeT IO Writer
 mkWriterM = unaryGEOSFunc mkWriter
 
--- | @MaybeT@-wrapped version of 'readGeometry'
+-- |@MaybeT@-wrapped version of 'readGeometry'
 readGeometryM :: Reader -> String -> MaybeT IO Geometry
 readGeometryM = binaryGEOSFunc readGeometry
 
@@ -156,6 +156,6 @@ runGEOSEither action = do
          Nothing -> Left <$> getErrorMessage
          Just r -> return $ Right r
 
--- | @MaybeT@-wrapped version of 'area'
+-- |@MaybeT@-wrapped version of 'area'
 writeGeometryM :: Writer -> Geometry -> MaybeT IO String
 writeGeometryM = binaryGEOSFunc writeGeometry
