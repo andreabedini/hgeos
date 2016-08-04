@@ -64,16 +64,15 @@ data Context = Context ContextStateRef
 
 data ContextState = ContextState
     { hCtx :: GEOSContextHandle
-    , hReaders :: [GEOSWKTReaderPtr]
-    , hWriters :: [GEOSWKTWriterPtr]
-    , hGeometries :: [GEOSGeometryPtr]
-    , hCoordinateSequences :: [GEOSCoordSequencePtr]
+    , deleteActions :: [DeleteAction]
     }
 
 type ContextStateRef = IORef ContextState
 
 -- |References a <https://trac.osgeo.org/geos/ GEOS> coordinate sequence
 data CoordinateSequence = CoordinateSequence ContextStateRef GEOSCoordSequencePtr
+
+type DeleteAction = IO ()
 
 -- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry type ID
 data GeometryType =
@@ -122,7 +121,8 @@ checkAndTrack sr f = do
     if isNullPtr h
     then return Nothing
     else do
-        modifyIORef' sr $ (\p@ContextState{..} -> p { hGeometries = h : hGeometries })
+        let deleteAction = c_GEOSGeom_destroy_r hCtx h
+        modifyIORef' sr $ (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
         return $ Just (Geometry sr h)
 
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
@@ -228,7 +228,7 @@ isEmpty (Geometry sr h) = do
 mkContext :: IO Context
 mkContext = do
     hCtx <- c_initializeGEOSWithHandlers
-    sr <- newIORef $ ContextState hCtx [] [] [] []
+    sr <- newIORef $ ContextState hCtx []
     return $ Context sr
 
 -- |Creates a reader used to deserialize 'Geometry' instances from
@@ -240,7 +240,8 @@ mkReader (Context sr) = do
     if isNullPtr h
     then return Nothing
     else do
-        modifyIORef' sr (\p@ContextState{..} -> p { hReaders = h : hReaders })
+        let deleteAction = c_GEOSWKTReader_destroy_r hCtx h
+        modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
         return $ Just (Reader sr h)
 
 -- |Creates a writer used to serialize 'Geometry' instances to
@@ -252,7 +253,8 @@ mkWriter (Context sr) = do
     if isNullPtr h
     then return Nothing
     else do
-        modifyIORef' sr (\p@ContextState{..} -> p { hWriters = h : hWriters })
+        let deleteAction = c_GEOSWKTWriter_destroy_r hCtx h
+        modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
         return $ Just (Writer sr h)
 
 -- |Deserializes a 'Geometry' instance from the given 'String' using the
@@ -264,10 +266,7 @@ readGeometry (Reader sr h) str = withCString str $ \cs -> do
 releaseContext :: Context -> IO ()
 releaseContext (Context sr) = do
     ContextState{..} <- readIORef sr
-    mapM_ (c_GEOSCoordSeq_destroy_r hCtx) hCoordinateSequences
-    mapM_ (c_GEOSGeom_destroy_r hCtx) hGeometries
-    mapM_ (c_GEOSWKTWriter_destroy_r hCtx) hWriters
-    mapM_ (c_GEOSWKTReader_destroy_r hCtx) hReaders
+    sequence_ deleteActions
     c_finishGEOS_r hCtx
 
 -- |Reports version of GEOS API
