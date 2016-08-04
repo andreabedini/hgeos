@@ -114,22 +114,30 @@ checkAndDoNotTrack sr f = do
                 then Nothing
                 else Just $ Geometry sr h
 
-checkAndTrack :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
-checkAndTrack sr f = do
+checkAndTrack :: NullablePtr a =>
+    ContextStateRef ->
+    (GEOSContextHandle -> IO a) ->
+    (GEOSContextHandle -> a -> IO ()) ->
+    (ContextStateRef -> a -> b) ->
+    IO (Maybe b)
+checkAndTrack sr create destroy wrap = do
     ContextState{..} <- readIORef sr
-    h <- f hCtx
+    h <- create hCtx
     if isNullPtr h
     then return Nothing
     else do
-        let deleteAction = c_GEOSGeom_destroy_r hCtx h
-        modifyIORef' sr $ (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
-        return $ Just (Geometry sr h)
+        let deleteAction = destroy hCtx h
+        modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
+        return $ Just (wrap sr h)
+
+checkAndTrackGeometry :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
+checkAndTrackGeometry sr create = checkAndTrack sr create c_GEOSGeom_destroy_r Geometry
 
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
 envelope :: Geometry -> IO (Maybe Geometry)
 envelope (Geometry sr h) =
-    checkAndTrack sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
+    checkAndTrackGeometry sr (\hCtx -> c_GEOSEnvelope_r hCtx h)
 
 -- |Returns type of a 'Geometry' instance
 geomTypeId :: Geometry -> IO (Maybe GeometryType)
@@ -213,7 +221,7 @@ getZ = getOrdinate c_GEOSCoordSeq_getZ_r
 -- supplied 'Geometry' instances:
 intersection :: Geometry -> Geometry -> IO (Maybe Geometry)
 intersection (Geometry sr0 h0) (Geometry sr1 h1) =
-    checkAndTrack sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
+    checkAndTrackGeometry sr0 (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
 
 -- |Returns value indicating if specified 'Geometry' instance is empty
 isEmpty :: Geometry -> IO (Maybe Bool)
@@ -234,34 +242,18 @@ mkContext = do
 -- |Creates a reader used to deserialize 'Geometry' instances from
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
 mkReader :: Context -> IO (Maybe Reader)
-mkReader (Context sr) = do
-    ContextState{..} <- readIORef sr
-    h <- c_GEOSWKTReader_create_r hCtx
-    if isNullPtr h
-    then return Nothing
-    else do
-        let deleteAction = c_GEOSWKTReader_destroy_r hCtx h
-        modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
-        return $ Just (Reader sr h)
+mkReader (Context sr) = checkAndTrack sr c_GEOSWKTReader_create_r c_GEOSWKTReader_destroy_r Reader
 
 -- |Creates a writer used to serialize 'Geometry' instances to
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
 mkWriter :: Context -> IO (Maybe Writer)
-mkWriter (Context sr) = do
-    ContextState{..} <- readIORef sr
-    h <- c_GEOSWKTWriter_create_r hCtx
-    if isNullPtr h
-    then return Nothing
-    else do
-        let deleteAction = c_GEOSWKTWriter_destroy_r hCtx h
-        modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
-        return $ Just (Writer sr h)
+mkWriter (Context sr) = checkAndTrack sr c_GEOSWKTWriter_create_r c_GEOSWKTWriter_destroy_r Writer
 
 -- |Deserializes a 'Geometry' instance from the given 'String' using the
 -- supplied 'Reader':
 readGeometry :: Reader -> String -> IO (Maybe Geometry)
 readGeometry (Reader sr h) str = withCString str $ \cs -> do
-    checkAndTrack sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
+    checkAndTrackGeometry sr (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
 
 releaseContext :: Context -> IO ()
 releaseContext (Context sr) = do
