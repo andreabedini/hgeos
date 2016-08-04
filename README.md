@@ -60,6 +60,12 @@ $ stack build
 $ stack test
 ```
 
+### Build with C function tracing enabled
+
+```bash
+$ stack build --ghc-options -optc-DENABLE_TRACE
+```
+
 ## Licence
 
 Released under MIT License
