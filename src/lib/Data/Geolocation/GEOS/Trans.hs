@@ -37,6 +37,9 @@ module Data.Geolocation.GEOS.Trans
     , readGeometryM
     , runGEOS
     , runGEOSEither
+    , setXM
+    , setYM
+    , setZM
     , writeGeometryM
     ) where
 
@@ -155,6 +158,15 @@ runGEOSEither action = do
     case result of
          Nothing -> Left <$> getErrorMessage
          Just r -> return $ Right r
+
+-- |@MaybeT@-wrapped version of 'setX'
+setXM = ternaryGEOSFunc setX
+
+-- |@MaybeT@-wrapped version of 'setY'
+setYM = ternaryGEOSFunc setY
+
+-- |@MaybeT@-wrapped version of 'setZ'
+setZM = ternaryGEOSFunc setZ
 
 -- |@MaybeT@-wrapped version of 'area'
 writeGeometryM :: Writer -> Geometry -> MaybeT IO String

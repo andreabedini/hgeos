@@ -33,6 +33,9 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSCoordSeq_getX_r
     , c_GEOSCoordSeq_getY_r
     , c_GEOSCoordSeq_getZ_r
+    , c_GEOSCoordSeq_setX_r
+    , c_GEOSCoordSeq_setY_r
+    , c_GEOSCoordSeq_setZ_r
     , c_GEOSEnvelope_r
     , c_GEOSFree_r_CString
     , c_GEOSGeomTypeId_r
@@ -118,6 +121,18 @@ foreign import ccall "GEOSCoordSeq_getY_r"
 -- |Wraps @GEOSCoordSeq_getZ_r@
 foreign import ccall "GEOSCoordSeq_getZ_r"
     c_GEOSCoordSeq_getZ_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_setX_r@
+foreign import ccall "GEOSCoordSeq_setX_r"
+    c_GEOSCoordSeq_setX_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_setY_r@
+foreign import ccall "GEOSCoordSeq_setY_r"
+    c_GEOSCoordSeq_setY_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_setZ_r@
+foreign import ccall "GEOSCoordSeq_setZ_r"
+    c_GEOSCoordSeq_setZ_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt
 
 -- |Wraps @GEOSEnvelope_r@
 foreign import ccall "GEOSEnvelope_r"

@@ -1,5 +1,6 @@
 module GEOSTest.TransAPI (demo) where
 
+import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
 import Data.Geolocation.GEOS.Trans
@@ -17,6 +18,13 @@ demo = do
         g2 <- intersectionM g0 g1
         writer <- mkWriterM ctx
         str <- writeGeometryM writer g2
-        coords <- createCoordSeqM ctx 100 2
+
+        coords <- createCoordSeqM ctx 10 3
+        size <- getSizeM coords
+        forM_ [0..size - 1] $ \i -> do
+            setXM coords i (fromIntegral i * 10.0)
+            setYM coords i (fromIntegral i * 20.0)
+            setZM coords i (fromIntegral i * 30.0)
+
         lift $ putStrLn str
     putStrLn $ "TransAPI.demo: " ++ (if isJust result then "succeeded" else "failed")

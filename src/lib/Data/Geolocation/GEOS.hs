@@ -46,6 +46,9 @@ module Data.Geolocation.GEOS
     , mkReader
     , mkWriter
     , readGeometry
+    , setX
+    , setY
+    , setZ
     , version
     , withGEOS
     , writeGeometry
@@ -274,6 +277,26 @@ releaseContext (Context sr) = do
     ContextState{..} <- readIORef sr
     mapM_ (\(DeleteAction _ f) -> f) deleteActions
     c_finishGEOS_r hCtx
+
+setOrdinate :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt ) -> CoordinateSequence -> Word -> Double -> IO (Maybe ())
+setOrdinate f (CoordinateSequence sr h) idx val = do
+    ContextState{..} <- readIORef sr
+    status <- f hCtx h (fromIntegral idx) (realToFrac val)
+    return $ case status of
+                  0 -> Nothing
+                  _ -> Just ()
+
+-- |Sets an "x" ordinate value within a coordinate sequence
+setX :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
+setX = setOrdinate c_GEOSCoordSeq_setX_r
+
+-- |Sets an "y" ordinate value within a coordinate sequence
+setY :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
+setY = setOrdinate c_GEOSCoordSeq_setY_r
+
+-- |Sets an "z" ordinate value within a coordinate sequence
+setZ :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
+setZ = setOrdinate c_GEOSCoordSeq_setZ_r
 
 -- |Reports version of GEOS API
 version :: IO String
