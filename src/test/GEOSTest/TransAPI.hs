@@ -23,10 +23,13 @@ demo = do
 
         coords <- createCoordSeqM ctx 10 3
         size <- getSizeM coords
-        forM_ [0..size - 1] $ \i -> do
+        forM_ [0..size - 2] $ \i -> do
             setXM coords i (fromIntegral i * 10.0)
             setYM coords i (fromIntegral i * 20.0)
             setZM coords i (fromIntegral i * 30.0)
+        setXM coords (size - 1) 0.0
+        setYM coords (size - 1) 0.0
+        setZM coords (size - 1) 0.0
         g3 <- createLinearRingM coords
         str1 <- writeGeometryM writer g3
         lift $ putStrLn str1
