@@ -14,9 +14,9 @@ This project uses [Stack][stack].
 
 ## Prerequisites
 
-This project currently links dynamically to your global installation
-of GEOS which you'll need to install before you can build the code.
-Future versions may bake GEOS in directly.
+This project currently links dynamically to your global installation of GEOS
+which you'll need to install before you can build the code. Future versions may
+bake GEOS in directly.
 
 ### Mac OS X
 
