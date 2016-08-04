@@ -34,10 +34,7 @@ $ sudo apt-get install libgeos++-dev
 
 ### Windows
 
-* [Follow Windows quick start instructions][windows-quick-start] under
-_Quick Start for OSGeo4W Users_
-* The current `.cabal` file for this project assumes that the installation is
-available at `C:\OSGeo4W64`
+* Windows binaries are included in the repository and resulting package
 
 ## Licence
 
@@ -52,4 +49,3 @@ Copyright (c) 2016 Richard Cook
 [geos]: https://trac.osgeo.org/geos/
 [homebrew]: http://brew.sh/
 [stack]: https://haskellstack.org/
-[windows-quick-start]: https://trac.osgeo.org/osgeo4w/
