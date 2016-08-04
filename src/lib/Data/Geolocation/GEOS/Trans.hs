@@ -20,6 +20,7 @@ For the high-level API, see "Data.Geolocation.GEOS".
 module Data.Geolocation.GEOS.Trans
     ( areaM
     , createCoordSeqM
+    , createLinearRingM
     , envelopeM
     , geomTypeIdM
     , getCoordSeqM
@@ -62,6 +63,10 @@ areaM = unaryGEOSFunc area
 -- |@MaybeT@-wrapped version of 'createCoordSeq'
 createCoordSeqM :: Context -> Word -> Word -> MaybeT IO CoordinateSequence
 createCoordSeqM = ternaryGEOSFunc createCoordSeq
+
+-- |@MaybeT@-wrapped version of 'createLinearRing'
+createLinearRingM :: CoordinateSequence -> MaybeT IO Geometry
+createLinearRingM = unaryGEOSFunc createLinearRing
 
 -- |@MaybeT@-wrapped version of 'envelope'
 envelopeM :: Geometry -> MaybeT IO Geometry

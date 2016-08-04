@@ -30,6 +30,7 @@ module Data.Geolocation.GEOS
     , Writer ()
     , area
     , createCoordSeq
+    , createLinearRing
     , envelope
     , geomTypeId
     , getCoordSeq
@@ -149,6 +150,13 @@ createCoordSeq (Context sr) size dims =
         (\hCtx -> c_GEOSCoordSeq_create_r hCtx (fromIntegral size) (fromIntegral dims))
         c_GEOSCoordSeq_destroy_r
         CoordinateSequence
+
+-- |Returns a linear ring 'Geometry' instance from the given coordinate
+-- sequence
+createLinearRing :: CoordinateSequence -> IO (Maybe Geometry)
+createLinearRing (CoordinateSequence sr (DeleteAction rawPtr _) h) = do
+    modifyIORef' sr $ \p@ContextState{..} -> p { deleteActions = filter (\(DeleteAction r _) -> r /= rawPtr) deleteActions }
+    checkAndTrackGeometry sr (\hCtx -> c_GEOSGeom_createLinearRing_r hCtx h)
 
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
@@ -279,7 +287,7 @@ releaseContext (Context sr) = do
     c_finishGEOS_r hCtx
 
 setOrdinate :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt ) -> CoordinateSequence -> Word -> Double -> IO (Maybe ())
-setOrdinate f (CoordinateSequence sr h) idx val = do
+setOrdinate f (CoordinateSequence sr _ h) idx val = do
     ContextState{..} <- readIORef sr
     status <- f hCtx h (fromIntegral idx) (realToFrac val)
     return $ case status of

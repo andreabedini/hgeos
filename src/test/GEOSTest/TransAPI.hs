@@ -13,11 +13,13 @@ demo :: IO ()
 demo = do
     result <- runGEOS $ \ctx -> do
         reader <- mkReaderM ctx
+        writer <- mkWriterM ctx
+
         g0 <- readGeometryM reader "POLYGON (( 10 10, 10 20, 20 20, 20 10, 10 10 ))"
         g1 <- readGeometryM reader "POLYGON (( 11 11, 11 12, 12 12, 12 11, 11 11 ))"
         g2 <- intersectionM g0 g1
-        writer <- mkWriterM ctx
-        str <- writeGeometryM writer g2
+        str0 <- writeGeometryM writer g2
+        lift $ putStrLn str0
 
         coords <- createCoordSeqM ctx 10 3
         size <- getSizeM coords
@@ -25,6 +27,8 @@ demo = do
             setXM coords i (fromIntegral i * 10.0)
             setYM coords i (fromIntegral i * 20.0)
             setZM coords i (fromIntegral i * 30.0)
+        g3 <- createLinearRingM coords
+        str1 <- writeGeometryM writer g3
+        lift $ putStrLn str1
 
-        lift $ putStrLn str
     putStrLn $ "TransAPI.demo: " ++ (if isJust result then "succeeded" else "failed")
