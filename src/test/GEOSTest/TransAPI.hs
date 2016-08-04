@@ -11,7 +11,7 @@ import Data.Maybe
 -- which guarantees that they are released when the context goes out of scope
 demo :: IO ()
 demo = do
-    result <- runGEOS $ \ctx -> do
+    result <- runGEOSEither $ \ctx -> do
         reader <- mkReaderM ctx
         writer <- mkWriterM ctx
 
@@ -31,4 +31,6 @@ demo = do
         str1 <- writeGeometryM writer g3
         lift $ putStrLn str1
 
-    putStrLn $ "TransAPI.demo: " ++ (if isJust result then "succeeded" else error "TransAPI.demo failed")
+    case result of
+         Left m -> error $ "TransAPI.demo failed: " ++ m
+         Right _ -> putStrLn "TransAPI.demo succeeded"
