@@ -8,10 +8,6 @@ Documentation is available on Hackage:
 * [`Data.Geolocation.GEOS`][data-geolocation-geos]
 * [`Data.Geolocation.GEOS.Imports`][data-geolocation-geos-imports]
 
-## Development
-
-This project uses [Stack][stack].
-
 ## Prerequisites
 
 This project currently links dynamically to your global installation of GEOS
@@ -35,6 +31,34 @@ $ sudo apt-get install libgeos++-dev
 ### Windows
 
 * Windows binaries are included in the repository and resulting package
+
+## Development
+
+This project uses [Stack][stack].
+
+### Configure
+
+```bash
+$ stack setup
+```
+
+### Clean
+
+```bash
+$ stack clean
+```
+
+### Build
+
+```bash
+$ stack build
+```
+
+### Test
+
+```bash
+$ stack test
+```
 
 ## Licence
 
