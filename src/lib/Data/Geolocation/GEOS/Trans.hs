@@ -27,6 +27,7 @@ module Data.Geolocation.GEOS.Trans
     , getExteriorRingM
     , getGeometryM
     , getNumGeometriesM
+    , getOrdinateM
     , getSizeM
     , getXM
     , getYM
@@ -91,6 +92,10 @@ getGeometryM = binaryGEOSFunc getGeometry
 -- |@MaybeT@-wrapped version of 'getNumGeometries'
 getNumGeometriesM :: Geometry -> MaybeT IO Int
 getNumGeometriesM = unaryGEOSFunc getNumGeometries
+
+-- |@MaybeT@-wrapped version of 'getOrdinate'
+getOrdinateM :: CoordinateSequence -> Word -> Word -> MaybeT IO Double
+getOrdinateM = ternaryGEOSFunc getOrdinate
 
 -- |@MaybeT@-wrapped version of 'getSize'
 getSizeM :: CoordinateSequence -> MaybeT IO Word

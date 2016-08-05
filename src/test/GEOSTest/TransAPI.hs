@@ -6,6 +6,10 @@ import Control.Monad.Trans.Maybe
 import Data.Geolocation.GEOS.Trans
 import Data.Maybe
 
+check :: Bool -> MaybeT IO ()
+check True = return ()
+check False = error "Check failed"
+
 -- Demonstrates use of monad transformer API
 -- Lifetimes of GEOS objects are automatically managed by the context objects
 -- which guarantees that they are released when the context goes out of scope
@@ -33,6 +37,20 @@ demo = do
         g3 <- createLinearRingM coords
         str1 <- writeGeometryM writer g3
         lift $ putStrLn str1
+
+        x0 <- getXM coords 1
+        check $ x0 == 10.0
+        y0 <- getYM coords 1
+        check $ y0 == 20.0
+        z0 <- getZM coords 1
+        check $ z0 == 30.0
+
+        x1 <- getOrdinateM coords 2 0
+        check $ x1 == 20.0
+        y1 <- getOrdinateM coords 2 1
+        check $ y1 == 40.0
+        z1 <- getOrdinateM coords 2 2
+        check $ z1 == 60.0
 
     case result of
          Left m -> error $ "TransAPI.demo failed: " ++ m

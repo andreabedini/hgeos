@@ -1,3 +1,7 @@
+# vNext
+
+* Implements getOrdinate
+
 # v0.1.6.0
 
 * Internal refactorings

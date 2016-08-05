@@ -29,6 +29,7 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSArea_r
     , c_GEOSCoordSeq_create_r
     , c_GEOSCoordSeq_destroy_r
+    , c_GEOSCoordSeq_getOrdinate_r
     , c_GEOSCoordSeq_getSize_r
     , c_GEOSCoordSeq_getX_r
     , c_GEOSCoordSeq_getY_r
@@ -106,6 +107,10 @@ foreign import ccall "GEOSCoordSeq_create_r"
 -- |Wraps @GEOSCoordSeq_destroy_r@
 foreign import ccall "GEOSCoordSeq_destroy_r"
     c_GEOSCoordSeq_destroy_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> IO ()
+
+-- |Wraps @GEOSCoordSeq_getOrdinate_r@
+foreign import ccall "GEOSCoordSeq_getOrdinate_r"
+    c_GEOSCoordSeq_getOrdinate_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CUInt -> Ptr CDouble -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_getSize_r@
 foreign import ccall "GEOSCoordSeq_getSize_r"

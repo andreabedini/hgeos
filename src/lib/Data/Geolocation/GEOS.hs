@@ -38,6 +38,7 @@ module Data.Geolocation.GEOS
     , getExteriorRing
     , getGeometry
     , getNumGeometries
+    , getOrdinate
     , getSize
     , getX
     , getY
@@ -194,8 +195,8 @@ getExteriorRing (Geometry sr _ h) =
 
 -- |Returns child 'Geometry' at given index
 getGeometry :: Geometry -> Int -> IO (Maybe Geometry)
-getGeometry (Geometry sr _ h) index =
-    checkAndDoNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral index))
+getGeometry (Geometry sr _ h) n =
+    checkAndDoNotTrack sr (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral n))
 
 -- |Gets the number of geometries in a 'Geometry' instance
 getNumGeometries :: Geometry -> IO (Maybe Int)
@@ -206,12 +207,22 @@ getNumGeometries (Geometry sr _ h) = do
                 then Nothing
                 else Just $ fromIntegral value
 
-getOrdinate :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
-    CoordinateSequence -> Word -> IO (Maybe Double)
-getOrdinate f (CoordinateSequence sr _ h) index = do
+-- |Gets an ordinate value from a coordinate sequence
+getOrdinate :: CoordinateSequence -> Word -> Word -> IO (Maybe Double)
+getOrdinate coords idx dim =
+    getOrdinateHelper
+        (\hCtx h idx' -> c_GEOSCoordSeq_getOrdinate_r hCtx h idx' (fromIntegral dim))
+        coords
+        idx
+
+getOrdinateHelper :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt) ->
+    CoordinateSequence ->
+    Word ->
+    IO (Maybe Double)
+getOrdinateHelper f (CoordinateSequence sr _ h) idx = do
     ContextState{..} <- readIORef sr
     alloca $ \valuePtr -> do
-        status <- f hCtx h (fromIntegral index) valuePtr
+        status <- f hCtx h (fromIntegral idx) valuePtr
         case status of
              0 -> return Nothing
              _ -> do
@@ -230,17 +241,17 @@ getSize (CoordinateSequence sr _ h) = do
                  size <- peek sizePtr
                  return $ Just (fromIntegral size)
 
--- |Gets an "x" ordinate value from a coordinate sequence
+-- |Gets an x-ordinate value from a coordinate sequence
 getX :: CoordinateSequence -> Word -> IO (Maybe Double)
-getX = getOrdinate c_GEOSCoordSeq_getX_r
+getX = getOrdinateHelper c_GEOSCoordSeq_getX_r
 
--- |Gets a "y" ordinate value from a coordinate sequence
+-- |Gets a y-ordinate value from a coordinate sequence
 getY :: CoordinateSequence -> Word -> IO (Maybe Double)
-getY = getOrdinate c_GEOSCoordSeq_getY_r
+getY = getOrdinateHelper c_GEOSCoordSeq_getY_r
 
--- |Gets a "z" ordinate value from a coordinate sequence
+-- |Gets a z-ordinate value from a coordinate sequence
 getZ :: CoordinateSequence -> Word -> IO (Maybe Double)
-getZ = getOrdinate c_GEOSCoordSeq_getZ_r
+getZ = getOrdinateHelper c_GEOSCoordSeq_getZ_r
 
 -- |Returns a 'Geometry' instance representing the intersection of the two
 -- supplied 'Geometry' instances:
@@ -294,15 +305,15 @@ setOrdinate f (CoordinateSequence sr _ h) idx val = do
                   0 -> Nothing
                   _ -> Just ()
 
--- |Sets an "x" ordinate value within a coordinate sequence
+-- |Sets an x-ordinate value within a coordinate sequence
 setX :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
 setX = setOrdinate c_GEOSCoordSeq_setX_r
 
--- |Sets an "y" ordinate value within a coordinate sequence
+-- |Sets an y-ordinate value within a coordinate sequence
 setY :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
 setY = setOrdinate c_GEOSCoordSeq_setY_r
 
--- |Sets an "z" ordinate value within a coordinate sequence
+-- |Sets an z-ordinate value within a coordinate sequence
 setZ :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
 setZ = setOrdinate c_GEOSCoordSeq_setZ_r
 
