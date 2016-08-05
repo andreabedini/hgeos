@@ -50,6 +50,7 @@ module Data.Geolocation.GEOS.Trans
 import Control.Applicative
 import Control.Monad.Trans.Maybe
 import Data.Geolocation.GEOS
+import Data.Word
 
 unaryGEOSFunc :: (a -> IO (Maybe b)) -> a -> MaybeT IO b
 unaryGEOSFunc = (MaybeT .)
