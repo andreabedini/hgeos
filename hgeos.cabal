@@ -29,6 +29,7 @@ library
   extra-libraries:    geos_c
   c-sources:          src/lib/Data/Geolocation/GEOS/helpers.c
   cc-options:         -std=c99 -pthread
+  include-dirs:       src/lib
   exposed-modules:    Data.Geolocation.GEOS
                     , Data.Geolocation.GEOS.Imports
                     , Data.Geolocation.GEOS.Trans
