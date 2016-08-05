@@ -1,6 +1,6 @@
 # vNext
 
-* Implements getOrdinate
+* Implements getOrdinate and setOrdinate
 
 # v0.1.6.0
 

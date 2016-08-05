@@ -28,28 +28,28 @@ demo = do
         coords <- createCoordSeqM ctx 10 3
         size <- getSizeM coords
         forM_ [0..size - 2] $ \i -> do
-            setXM coords i (fromIntegral i * 10.0)
-            setYM coords i (fromIntegral i * 20.0)
-            setZM coords i (fromIntegral i * 30.0)
-        setXM coords (size - 1) 0.0
-        setYM coords (size - 1) 0.0
-        setZM coords (size - 1) 0.0
+            setXM coords i (fromIntegral (i + 1) * 10.0)
+            setYM coords i (fromIntegral (i + 1) * 20.0)
+            setZM coords i (fromIntegral (i + 1) * 30.0)
+        setOrdinateM coords (size - 1) 0 10.0
+        setOrdinateM coords (size - 1) 1 20.0
+        setOrdinateM coords (size - 1) 2 30.0
         g3 <- createLinearRingM coords
         str1 <- writeGeometryM writer g3
         lift $ putStrLn str1
 
-        x0 <- getXM coords 1
+        x0 <- getXM coords 0
         check $ x0 == 10.0
-        y0 <- getYM coords 1
+        y0 <- getYM coords 0
         check $ y0 == 20.0
-        z0 <- getZM coords 1
+        z0 <- getZM coords 0
         check $ z0 == 30.0
 
-        x1 <- getOrdinateM coords 2 0
+        x1 <- getOrdinateM coords 1 0
         check $ x1 == 20.0
-        y1 <- getOrdinateM coords 2 1
+        y1 <- getOrdinateM coords 1 1
         check $ y1 == 40.0
-        z1 <- getOrdinateM coords 2 2
+        z1 <- getOrdinateM coords 1 2
         check $ z1 == 60.0
 
     case result of

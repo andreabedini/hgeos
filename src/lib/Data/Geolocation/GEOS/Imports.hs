@@ -34,6 +34,7 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSCoordSeq_getX_r
     , c_GEOSCoordSeq_getY_r
     , c_GEOSCoordSeq_getZ_r
+    , c_GEOSCoordSeq_setOrdinate_r
     , c_GEOSCoordSeq_setX_r
     , c_GEOSCoordSeq_setY_r
     , c_GEOSCoordSeq_setZ_r
@@ -127,6 +128,10 @@ foreign import ccall "GEOSCoordSeq_getY_r"
 -- |Wraps @GEOSCoordSeq_getZ_r@
 foreign import ccall "GEOSCoordSeq_getZ_r"
     c_GEOSCoordSeq_getZ_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> Ptr CDouble -> IO CInt
+
+-- |Wraps @GEOSCoordSeq_setOrdinate_r@
+foreign import ccall "GEOSCoordSeq_setOrdinate_r"
+    c_GEOSCoordSeq_setOrdinate_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CUInt -> CDouble -> IO CInt
 
 -- |Wraps @GEOSCoordSeq_setX_r@
 foreign import ccall "GEOSCoordSeq_setX_r"

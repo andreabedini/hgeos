@@ -39,6 +39,7 @@ module Data.Geolocation.GEOS.Trans
     , readGeometryM
     , runGEOS
     , runGEOSEither
+    , setOrdinateM
     , setXM
     , setYM
     , setZM
@@ -56,6 +57,9 @@ binaryGEOSFunc f a b = MaybeT (f a b)
 
 ternaryGEOSFunc :: (a -> b -> c -> IO (Maybe d)) -> a -> b -> c -> MaybeT IO d
 ternaryGEOSFunc f a b c = MaybeT (f a b c)
+
+quaternaryGEOSFunc :: (a -> b -> c -> d -> IO (Maybe e)) -> a -> b -> c -> d -> MaybeT IO e
+quaternaryGEOSFunc f a b c d = MaybeT (f a b c d)
 
 -- |@MaybeT@-wrapped version of 'area'
 areaM :: Geometry -> MaybeT IO Double
@@ -168,6 +172,9 @@ runGEOSEither action = do
     case result of
          Nothing -> Left <$> getErrorMessage
          Just r -> return $ Right r
+
+-- |@MaybeT@-wrapped version of 'setOrdinate'
+setOrdinateM = quaternaryGEOSFunc setOrdinate
 
 -- |@MaybeT@-wrapped version of 'setX'
 setXM = ternaryGEOSFunc setX

@@ -48,6 +48,7 @@ module Data.Geolocation.GEOS
     , mkReader
     , mkWriter
     , readGeometry
+    , setOrdinate
     , setX
     , setY
     , setZ
@@ -297,8 +298,16 @@ releaseContext (Context sr) = do
     mapM_ (\(DeleteAction _ f) -> f) deleteActions
     c_finishGEOS_r hCtx
 
-setOrdinate :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt ) -> CoordinateSequence -> Word -> Double -> IO (Maybe ())
-setOrdinate f (CoordinateSequence sr _ h) idx val = do
+-- |Sets an x-ordinate value within a coordinate sequence
+setOrdinate :: CoordinateSequence -> Word -> Word -> Double -> IO (Maybe ())
+setOrdinate coords idx dim =
+    setOrdinateHelper
+        (\hCtx h idx' -> c_GEOSCoordSeq_setOrdinate_r hCtx h idx' (fromIntegral dim))
+        coords
+        idx
+
+setOrdinateHelper :: (GEOSContextHandle -> GEOSCoordSequencePtr -> CUInt -> CDouble -> IO CInt ) -> CoordinateSequence -> Word -> Double -> IO (Maybe ())
+setOrdinateHelper f (CoordinateSequence sr _ h) idx val = do
     ContextState{..} <- readIORef sr
     status <- f hCtx h (fromIntegral idx) (realToFrac val)
     return $ case status of
@@ -307,15 +316,15 @@ setOrdinate f (CoordinateSequence sr _ h) idx val = do
 
 -- |Sets an x-ordinate value within a coordinate sequence
 setX :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
-setX = setOrdinate c_GEOSCoordSeq_setX_r
+setX = setOrdinateHelper c_GEOSCoordSeq_setX_r
 
--- |Sets an y-ordinate value within a coordinate sequence
+-- |Sets a y-ordinate value within a coordinate sequence
 setY :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
-setY = setOrdinate c_GEOSCoordSeq_setY_r
+setY = setOrdinateHelper c_GEOSCoordSeq_setY_r
 
--- |Sets an z-ordinate value within a coordinate sequence
+-- |Sets a z-ordinate value within a coordinate sequence
 setZ :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
-setZ = setOrdinate c_GEOSCoordSeq_setZ_r
+setZ = setOrdinateHelper c_GEOSCoordSeq_setZ_r
 
 -- |Reports version of GEOS API
 version :: IO String
