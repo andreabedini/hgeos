@@ -52,6 +52,10 @@ demo = do
         z1 <- getOrdinateM coords 1 2
         check $ z1 == 60.0
 
+        p <- createPolygonM g3 []
+        str2 <- writeGeometryM writer p
+        lift $ putStrLn str2
+
     case result of
          Left m -> error $ "TransAPI.demo failed: " ++ m
          Right _ -> putStrLn "TransAPI.demo succeeded"

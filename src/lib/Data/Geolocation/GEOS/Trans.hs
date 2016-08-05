@@ -21,6 +21,7 @@ module Data.Geolocation.GEOS.Trans
     ( areaM
     , createCoordSeqM
     , createLinearRingM
+    , createPolygonM
     , envelopeM
     , geomTypeIdM
     , getCoordSeqM
@@ -72,6 +73,10 @@ createCoordSeqM = ternaryGEOSFunc createCoordSeq
 -- |@MaybeT@-wrapped version of 'createLinearRing'
 createLinearRingM :: CoordinateSequence -> MaybeT IO Geometry
 createLinearRingM = unaryGEOSFunc createLinearRing
+
+-- |@MaybeT@-wrapped version of 'createPolygon'
+createPolygonM :: Geometry -> [Geometry] -> MaybeT IO Geometry
+createPolygonM = binaryGEOSFunc createPolygon
 
 -- |@MaybeT@-wrapped version of 'envelope'
 envelopeM :: Geometry -> MaybeT IO Geometry

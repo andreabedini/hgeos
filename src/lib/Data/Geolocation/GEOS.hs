@@ -31,6 +31,7 @@ module Data.Geolocation.GEOS
     , area
     , createCoordSeq
     , createLinearRing
+    , createPolygon
     , envelope
     , geomTypeId
     , getCoordSeq
@@ -64,6 +65,7 @@ import Data.IORef
 import Data.Word
 import Foreign.C
 import Foreign.Marshal.Alloc
+import Foreign.Marshal.Array
 import Foreign.Ptr
 import Foreign.Storable
 
@@ -156,9 +158,19 @@ createCoordSeq (Context sr) size dims =
 -- |Returns a linear ring 'Geometry' instance from the given coordinate
 -- sequence
 createLinearRing :: CoordinateSequence -> IO (Maybe Geometry)
-createLinearRing (CoordinateSequence sr (DeleteAction rawPtr _) h) = do
-    modifyIORef' sr $ \p@ContextState{..} -> p { deleteActions = filter (\(DeleteAction r _) -> r /= rawPtr) deleteActions }
+createLinearRing (CoordinateSequence sr deleteAction h) = do
+    untrack sr deleteAction
     checkAndTrackGeometry sr (\hCtx -> c_GEOSGeom_createLinearRing_r hCtx h)
+
+-- |Returns a polygon 'Geometry' instance from the given shell and optional
+-- array of holes
+createPolygon :: Geometry -> [Geometry] -> IO (Maybe Geometry)
+createPolygon (Geometry sr deleteAction h) holes = do
+    untrack sr deleteAction
+    withArrayLen (map (\(Geometry _ _ h') -> h') holes) $ \count array ->
+        checkAndTrackGeometry
+            sr
+            (\hCtx -> c_GEOSGeom_createPolygon_r hCtx h array (fromIntegral count))
 
 -- |Returns a 'Geometry' instance representing the envelope of the supplied
 -- 'Geometry'
@@ -325,6 +337,10 @@ setY = setOrdinateHelper c_GEOSCoordSeq_setY_r
 -- |Sets a z-ordinate value within a coordinate sequence
 setZ :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
 setZ = setOrdinateHelper c_GEOSCoordSeq_setZ_r
+
+untrack :: ContextStateRef -> DeleteAction -> IO ()
+untrack sr (DeleteAction rawPtr _) =
+    modifyIORef' sr $ \p@ContextState{..} -> p { deleteActions = filter (\(DeleteAction r _) -> r /= rawPtr) deleteActions }
 
 -- |Reports version of GEOS API
 version :: IO String

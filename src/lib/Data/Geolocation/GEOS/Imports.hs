@@ -19,6 +19,8 @@ For the monad transformer wrappers, see "Data.Geolocation.GEOS.Trans".
 <https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/LowLevelAPI.hs View sample>
 -}
 
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Data.Geolocation.GEOS.Imports
     ( GEOSContextHandle ()
     , GEOSCoordSequencePtr ()
@@ -42,6 +44,7 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSFree_r_CString
     , c_GEOSGeomTypeId_r
     , c_GEOSGeom_createLinearRing_r
+    , c_GEOSGeom_createPolygon_r
     , c_GEOSGeom_destroy_r
     , c_GEOSGeom_getCoordSeq_r
     , c_GEOSGetExteriorRing_r
@@ -63,6 +66,7 @@ module Data.Geolocation.GEOS.Imports
 
 import Foreign.C
 import Foreign.Ptr
+import Foreign.Storable
 
 -- |Determines if given pointer is null
 class NullablePtr a where
@@ -80,7 +84,7 @@ instance NullablePtr GEOSCoordSequencePtr where
     rawIntPtr (GEOSCoordSequencePtr p) = ptrToIntPtr p
 
 -- |Wraps @GEOSGeometry*@
-newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr)
+newtype GEOSGeometryPtr = GEOSGeometryPtr (Ptr GEOSGeometryPtr) deriving Storable
 instance NullablePtr GEOSGeometryPtr where
     isNullPtr (GEOSGeometryPtr p) = p == nullPtr
     rawIntPtr (GEOSGeometryPtr p) = ptrToIntPtr p
@@ -160,6 +164,10 @@ foreign import ccall "GEOSGeomTypeId_r"
 -- |Wraps @GEOSGeom_createLinearRing_r@
 foreign import ccall "GEOSGeom_createLinearRing_r"
     c_GEOSGeom_createLinearRing_r :: GEOSContextHandle -> GEOSCoordSequencePtr -> IO GEOSGeometryPtr
+
+-- |Wraps @GEOSGeom_createPolygon_r@
+foreign import ccall "GEOSGeom_createPolygon_r"
+    c_GEOSGeom_createPolygon_r :: GEOSContextHandle -> GEOSGeometryPtr -> Ptr GEOSGeometryPtr -> CUInt -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSGeom_destroy_r@
 foreign import ccall "GEOSGeom_destroy_r"
