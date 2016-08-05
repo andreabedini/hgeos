@@ -1,3 +1,7 @@
+# vNext
+
+* Removes problematic helpers.h
+
 # v0.1.7.0
 
 * Implements getOrdinate and setOrdinate

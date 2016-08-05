@@ -230,13 +230,13 @@ foreign import ccall "finishGEOS_r"
     c_finishGEOS_r :: GEOSContextHandle -> IO ()
 
 -- |Wraps @getErrorMessage@ helper function
-foreign import ccall "helpers.h getErrorMessage"
+foreign import ccall "getErrorMessage"
     c_getErrorMessage :: IO CString
 
 -- |Wraps @getNoticeMessage@ helper function
-foreign import ccall "helpers.h getNoticeMessage"
+foreign import ccall "getNoticeMessage"
     c_getNoticeMessage :: IO CString
 
 -- |Wraps @initializeGEOSWithHandlers@ helper function
-foreign import ccall "helpers.h initializeGEOSWithHandlers"
+foreign import ccall "initializeGEOSWithHandlers"
     c_initializeGEOSWithHandlers :: IO GEOSContextHandle
