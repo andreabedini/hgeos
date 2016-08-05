@@ -1,4 +1,4 @@
-# hgeos [![Hackage](https://img.shields.io/hackage/v/hgeos.svg?maxAge=2592000)](http://hackage.haskell.org/package/hgeos)
+# hgeos [![Hackage](https://img.shields.io/hackage/v/hgeos.svg?maxAge=2592000)](http://hackage.haskell.org/package/hgeos) [![Travis](https://img.shields.io/travis/rcook/hgeos.svg?maxAge=2592000)](https://travis-ci.org/rcook/hgeos) [![GitHub issues](https://img.shields.io/github/issues/rcook/hgeos.svg)](https://github.com/rcook/hgeos/issues) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/rcook/hgeos/master/LICENSE)
 
 Simple Haskell bindings to the [GEOS][geos] [C API][capi] heavily inspired by
 [Django GEOS bindings][django-gis]
