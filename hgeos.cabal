@@ -1,5 +1,5 @@
 name:                 hgeos
-version:              0.1.7.0
+version:              0.1.7.1
 synopsis:             Simple Haskell bindings to GEOS C API
 description:
   Simple Haskell bindings to the <https://trac.osgeo.org/geos/ GEOS>
