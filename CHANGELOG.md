@@ -1,4 +1,4 @@
-# vNext
+# v0.1.7.0
 
 * Implements getOrdinate and setOrdinate
 * Implements createPolygon
