@@ -47,6 +47,7 @@ module Data.Geolocation.GEOS.Trans
     , writeGeometryM
     ) where
 
+import Control.Applicative
 import Control.Monad.Trans.Maybe
 import Data.Geolocation.GEOS
 

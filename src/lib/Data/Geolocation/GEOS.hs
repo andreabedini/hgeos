@@ -58,6 +58,7 @@ module Data.Geolocation.GEOS
     , writeGeometry
     ) where
 
+import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.Geolocation.GEOS.Imports
