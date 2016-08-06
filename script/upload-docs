@@ -8,12 +8,15 @@ fi
 SCRIPTPATH=$($READLINK -f $0)
 SCRIPTDIR=$(dirname $SCRIPTPATH)
 REPODIR=$(dirname $SCRIPTDIR)
+CREDENTIALSPATH=$HOME/.stack/upload/credentials.json
 
-if [ "$#" -ne 1 ]; then
-  echo Usage: $0 HACKAGEUSER
+if [ ! -f $CREDENTIALSPATH ]; then
+  echo "Couldn't find Stack credentials"
   exit 1
 fi
-HACKAGEUSER=$1
+
+HACKAGEUSER=$(grep -Po '"username":"\K[^"]*(?=")' $CREDENTIALSPATH)
+HACKAGEPASSWORD=$(grep -Po '"password":"\K[^"]*(?=")' $CREDENTIALSPATH)
 
 cd $REPODIR
 
@@ -50,6 +53,6 @@ curl \
   -X PUT \
   -H 'Content-Type: application/x-tar' \
   -H 'Content-Encoding: gzip' \
-  -u $HACKAGEUSER \
+  -u $HACKAGEUSER:$HACKAGEPASSWORD \
   --data-binary "@$TEMPDIR/$DOCDIR.tar.gz" \
   "https://hackage.haskell.org/package/$PACKAGENAME-$PACKAGEVER/docs"
