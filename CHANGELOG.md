@@ -1,3 +1,8 @@
+# vNext
+
+* Adds createCollection
+* Adds createEmptyPolygon
+
 # v0.1.7.2
 
 * Fixes #5: Passing holes to createPolygon results in double free

@@ -30,7 +30,9 @@ module Data.Geolocation.GEOS
     , Reader ()
     , Writer ()
     , area
+    , createCollection
     , createCoordSeq
+    , createEmptyPolygon
     , createLinearRing
     , createPolygon
     , envelope
@@ -104,7 +106,11 @@ data Reader = Reader ContextStateRef DeleteAction GEOSWKTReaderPtr
 data Writer = Writer ContextStateRef DeleteAction GEOSWKTWriterPtr
 
 -- |References a <https://trac.osgeo.org/geos/ GEOS> geometry
-data Geometry = Geometry ContextStateRef DeleteAction GEOSGeometryPtr
+data Geometry = Geometry
+    { geometryStateRef :: ContextStateRef
+    , geometryDeleteAction :: DeleteAction
+    , geometryRawPtr :: GEOSGeometryPtr
+    }
 
 -- |Returns area of a 'Geometry' instance
 area :: Geometry -> IO (Maybe Double)
@@ -148,6 +154,15 @@ checkAndTrackGeometry sr create = checkAndTrack sr create c_GEOSGeom_destroy_r G
 emptyDeleteAction :: DeleteAction
 emptyDeleteAction = DeleteAction (ptrToIntPtr nullPtr) (return ())
 
+-- |Creates a 'Geometry' collection
+createCollection :: GeometryType -> [Geometry] -> IO (Maybe Geometry)
+createCollection geometryType gs@((Geometry sr _ _) : _) = do
+    untrack sr (map geometryDeleteAction gs)
+    withArrayLen (map geometryRawPtr gs) $ \count array ->
+        checkAndTrackGeometry
+            sr
+            (\hCtx -> c_GEOSGeom_createCollection_r hCtx (fromIntegral $ fromEnum geometryType) nullPtr (fromIntegral count))
+
 -- |Creates an empty 'CoordinateSequence' instance
 createCoordSeq :: Context -> Word -> Word -> IO (Maybe CoordinateSequence)
 createCoordSeq (Context sr) size dims =
@@ -156,6 +171,12 @@ createCoordSeq (Context sr) size dims =
         (\hCtx -> c_GEOSCoordSeq_create_r hCtx (fromIntegral size) (fromIntegral dims))
         c_GEOSCoordSeq_destroy_r
         CoordinateSequence
+
+-- |Returns an empty polygon 'Geometry' instance
+createEmptyPolygon :: Context -> IO (Maybe Geometry)
+createEmptyPolygon (Context sr) = do
+    ContextState{..} <- readIORef sr
+    checkAndTrackGeometry sr c_GEOSGeom_createEmptyPolygon_r
 
 -- |Returns a linear ring 'Geometry' instance from the given coordinate
 -- sequence
@@ -168,8 +189,8 @@ createLinearRing (CoordinateSequence sr deleteAction h) = do
 -- array of holes
 createPolygon :: Geometry -> [Geometry] -> IO (Maybe Geometry)
 createPolygon (Geometry sr deleteAction h) holes = do
-    untrack sr (deleteAction : map (\(Geometry _ x _) -> x) holes)
-    withArrayLen (map (\(Geometry _ _ h') -> h') holes) $ \count array ->
+    untrack sr (deleteAction : map geometryDeleteAction holes)
+    withArrayLen (map geometryRawPtr holes) $ \count array ->
         checkAndTrackGeometry
             sr
             (\hCtx -> c_GEOSGeom_createPolygon_r hCtx h array (fromIntegral count))

@@ -43,6 +43,8 @@ module Data.Geolocation.GEOS.Imports
     , c_GEOSEnvelope_r
     , c_GEOSFree_r_CString
     , c_GEOSGeomTypeId_r
+    , c_GEOSGeom_createCollection_r
+    , c_GEOSGeom_createEmptyPolygon_r
     , c_GEOSGeom_createLinearRing_r
     , c_GEOSGeom_createPolygon_r
     , c_GEOSGeom_destroy_r
@@ -160,6 +162,14 @@ foreign import ccall "GEOSFree_r"
 -- |Wraps @GEOSGeomTypeId_r@
 foreign import ccall "GEOSGeomTypeId_r"
     c_GEOSGeomTypeId_r :: GEOSContextHandle -> GEOSGeometryPtr -> IO CInt
+
+-- |Wraps @GEOSGeom_createCollection_r@
+foreign import ccall "GEOSGeom_createCollection_r"
+    c_GEOSGeom_createCollection_r :: GEOSContextHandle -> CInt -> Ptr GEOSGeometryPtr -> CUInt -> IO GEOSGeometryPtr
+
+-- |Wraps @GEOSGeom_createEmptyPolygon_r@
+foreign import ccall "GEOSGeom_createEmptyPolygon_r"
+    c_GEOSGeom_createEmptyPolygon_r :: GEOSContextHandle -> IO GEOSGeometryPtr
 
 -- |Wraps @GEOSGeom_createLinearRing_r@
 foreign import ccall "GEOSGeom_createLinearRing_r"

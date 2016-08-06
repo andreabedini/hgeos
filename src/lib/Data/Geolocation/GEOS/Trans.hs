@@ -19,7 +19,9 @@ For the high-level API, see "Data.Geolocation.GEOS".
 
 module Data.Geolocation.GEOS.Trans
     ( areaM
+    , createCollectionM
     , createCoordSeqM
+    , createEmptyPolygonM
     , createLinearRingM
     , createPolygonM
     , envelopeM
@@ -68,9 +70,17 @@ quaternaryGEOSFunc f a b c d = MaybeT (f a b c d)
 areaM :: Geometry -> MaybeT IO Double
 areaM = unaryGEOSFunc area
 
+-- |@MaybeT@-wrapped version of 'createCollection'
+createCollectionM :: GeometryType -> [Geometry] -> MaybeT IO Geometry
+createCollectionM = binaryGEOSFunc createCollection
+
 -- |@MaybeT@-wrapped version of 'createCoordSeq'
 createCoordSeqM :: Context -> Word -> Word -> MaybeT IO CoordinateSequence
 createCoordSeqM = ternaryGEOSFunc createCoordSeq
+
+-- |@MaybeT@-wrapped version of 'createEmptyPolygon'
+createEmptyPolygonM :: Context -> MaybeT IO Geometry
+createEmptyPolygonM = unaryGEOSFunc createEmptyPolygon
 
 -- |@MaybeT@-wrapped version of 'createLinearRing'
 createLinearRingM :: CoordinateSequence -> MaybeT IO Geometry
