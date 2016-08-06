@@ -7,6 +7,7 @@ Documentation is available on Hackage:
 
 * [`Data.Geolocation.GEOS`][data-geolocation-geos]
 * [`Data.Geolocation.GEOS.Imports`][data-geolocation-geos-imports]
+* [`Data.Geolocation.GEOS.Trans`][data-geolocation-geos-trans]
 
 ## Prerequisites
 
@@ -101,6 +102,7 @@ Copyright (c) 2016 Richard Cook
 [capi]: http://geos.osgeo.org/doxygen/geos__c_8h_source.html
 [data-geolocation-geos]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS.html
 [data-geolocation-geos-imports]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS-Imports.html
+[data-geolocation-geos-trans]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS-Trans.html
 [django-gis]: https://github.com/django/django/tree/master/django/contrib/gis/geos
 [geos]: https://trac.osgeo.org/geos/
 [homebrew]: http://brew.sh/
