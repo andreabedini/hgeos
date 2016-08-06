@@ -7,10 +7,10 @@ Maintainer  : rcook@rcook.org
 Stability   : experimental
 Portability : portable
 
-These are low-level FFI bindings for the GEOS C API derived from
-<http://geos.osgeo.org/doxygen/geos__c_8h_source.html geos_c.h>. These enable
-low-level access to the native functions for parts of the C API for which
-high-level wrappers do not yet exist.
+These are low-level FFI bindings for the Geometry Engine Open Source C API
+derived from <http://geos.osgeo.org/doxygen/geos__c_8h_source.html geos_c.h>.
+These enable low-level access to the native functions for parts of the C API
+for which high-level wrappers do not yet exist.
 
 For the high-level API, see "Data.Geolocation.GEOS".
 

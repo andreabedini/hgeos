@@ -1,3 +1,13 @@
+/*
+Module      : helpers.c
+Description : C helper functions for hgeos
+Copyright   : (C) Richard Cook, 2016
+Licence     : MIT
+Maintainer  : rcook@rcook.org
+Stability   : experimental
+Portability : portable
+*/
+
 #include <geos_c.h>
 #include <stdarg.h>
 #include <stdio.h>

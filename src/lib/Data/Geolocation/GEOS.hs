@@ -7,8 +7,9 @@ Maintainer  : rcook@rcook.org
 Stability   : experimental
 Portability : portable
 
-A high-level API for interoperating with GEOS C API which includes automatic
-management of lifetimes of objects such as readers, writers and geometries.
+A high-level API for interoperating with Geometry Engine Open Source C API
+which includes automatic management of lifetimes of objects such as readers,
+writers and geometries.
 
 For the low-level FFI bindings, see "Data.Geolocation.GEOS.Imports".
 
