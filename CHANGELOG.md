@@ -1,4 +1,4 @@
-# vNext
+# v0.1.7.3
 
 * Adds createCollection
 * Adds createEmptyPolygon
