@@ -160,14 +160,14 @@ createCoordSeq (Context sr) size dims =
 -- sequence
 createLinearRing :: CoordinateSequence -> IO (Maybe Geometry)
 createLinearRing (CoordinateSequence sr deleteAction h) = do
-    untrack sr deleteAction
+    untrack sr [deleteAction]
     checkAndTrackGeometry sr (\hCtx -> c_GEOSGeom_createLinearRing_r hCtx h)
 
 -- |Returns a polygon 'Geometry' instance from the given shell and optional
 -- array of holes
 createPolygon :: Geometry -> [Geometry] -> IO (Maybe Geometry)
 createPolygon (Geometry sr deleteAction h) holes = do
-    untrack sr deleteAction
+    untrack sr (deleteAction : map (\(Geometry _ x _) -> x) holes)
     withArrayLen (map (\(Geometry _ _ h') -> h') holes) $ \count array ->
         checkAndTrackGeometry
             sr
@@ -339,9 +339,10 @@ setY = setOrdinateHelper c_GEOSCoordSeq_setY_r
 setZ :: CoordinateSequence -> Word -> Double -> IO (Maybe ())
 setZ = setOrdinateHelper c_GEOSCoordSeq_setZ_r
 
-untrack :: ContextStateRef -> DeleteAction -> IO ()
-untrack sr (DeleteAction rawPtr _) =
-    modifyIORef' sr $ \p@ContextState{..} -> p { deleteActions = filter (\(DeleteAction r _) -> r /= rawPtr) deleteActions }
+untrack :: ContextStateRef -> [DeleteAction] -> IO ()
+untrack sr deleteActions = do
+    let rawPtrs = map (\(DeleteAction rawPtr _) -> rawPtr) deleteActions
+    modifyIORef' sr $ \p@ContextState{..} -> p { deleteActions = filter (\(DeleteAction rawPtr _) -> not (rawPtr `elem` rawPtrs)) deleteActions }
 
 -- |Reports version of GEOS API
 version :: IO String

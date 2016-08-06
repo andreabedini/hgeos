@@ -3,12 +3,24 @@ module GEOSTest.TransAPI (demo) where
 import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
+import Data.Geolocation.GEOS (Context, Geometry)
 import Data.Geolocation.GEOS.Trans
 import Data.Maybe
 
 check :: Bool -> MaybeT IO ()
 check True = return ()
 check False = error "Check failed"
+
+type Coordinate = (Double, Double)
+
+createLinearRing :: Context -> [Coordinate] -> MaybeT IO Geometry
+createLinearRing ctx cs = do
+    let count = length cs
+    coords <- createCoordSeqM ctx (fromIntegral count) 2
+    forM_ (zip [0..] cs) $ \(i, (x, y)) -> do
+        setXM coords i x
+        setYM coords i y
+    createLinearRingM coords
 
 -- Demonstrates use of monad transformer API
 -- Lifetimes of GEOS objects are automatically managed by the context objects
@@ -55,6 +67,12 @@ demo = do
         p <- createPolygonM g3 []
         str2 <- writeGeometryM writer p
         lift $ putStrLn str2
+
+        shell <- createLinearRing ctx [(-10.0, -10.0), (-10.0, 10.0), (10.0, 10.0), (10.0, -10.0), (-10.0, -10.0)]
+        hole <- createLinearRing ctx [(-5.0, -5.0), (-5.0, 5.0), (5.0, 5.0), (5.0, -5.0), (-5.0, -5.0)]
+        polygon <- createPolygonM shell [hole]
+        str3 <- writeGeometryM writer polygon
+        lift $ putStrLn str3
 
     case result of
          Left m -> error $ "TransAPI.demo failed: " ++ m
