@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  READLINK=greadlink
+else
+  READLINK=readlink
+fi
+SCRIPTPATH=$($READLINK -f $0)
+SCRIPTDIR=$(dirname $SCRIPTPATH)
+
+USERID=$(stat -c "%u" .)
+GROUPID=$(stat -c "%g" .)
+USERNAME=$(stat -c "%U" .)
+GROUPNAME=$(stat -c "%G" .)
+REPODIR=$(dirname $SCRIPTDIR)
+PROJECTNAME=$(basename $REPODIR)
+TEMPDIR=$(mktemp -d)
+trap "rm -rf $TEMPDIR" EXIT
+
+echo '*' > $TEMPDIR/.dockerignore
+cp $SCRIPTDIR/hgeos-cabal.docker $TEMPDIR/Dockerfile
+
+echo "RUN groupadd -g $GROUPID $GROUPNAME" >> $TEMPDIR/Dockerfile
+echo "RUN useradd -u $USERID -g $GROUPID $USERNAME" >> $TEMPDIR/Dockerfile
+echo "RUN mkdir /home/$USERNAME" >> $TEMPDIR/Dockerfile
+echo "RUN chown $USERNAME:$USERNAME /home/$USERNAME" >> $TEMPDIR/Dockerfile
+
+docker build -t hgeos-cabal -f $TEMPDIR/Dockerfile $TEMPDIR

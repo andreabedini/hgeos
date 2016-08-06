@@ -1,0 +1,8 @@
+FROM haskell
+MAINTAINER Richard Cook <rcook@rcook.org>
+
+RUN apt-get update -y && apt-get install -y \
+  gawk \
+  libgeos++-dev
+
+CMD /bin/bash

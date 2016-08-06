@@ -66,6 +66,32 @@ $ stack test
 $ stack build --ghc-options -optc-DENABLE_TRACE
 ```
 
+### Run containerized Cabal tests
+
+Create Docker image:
+
+```bash
+$ script/build-cabal-image
+```
+
+Run Cabal tests:
+
+```bash
+$ script/run-cabal-test
+```
+
+Run Cabal shell for debugging:
+
+```bash
+$ script/run-cabal-shell
+```
+
+### Build and run all tests
+
+```bash
+$ script/test
+```
+
 ## Licence
 
 Released under MIT License

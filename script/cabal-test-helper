@@ -1,0 +1,45 @@
+#!/bin/bash
+set -e
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  READLINK=greadlink
+else
+  READLINK=readlink
+fi
+SCRIPTPATH=$($READLINK -f $0)
+SCRIPTDIR=$(dirname $SCRIPTPATH)
+REPODIR=$(dirname $SCRIPTDIR)
+
+BUILDDIR=$HOME/build
+cp -r $REPODIR $BUILDDIR
+cd $BUILDDIR
+
+CABALFILE=$(find . -maxdepth 1 -name "*.cabal" -print -quit)
+if [ ! -f "$CABALFILE" ]; then
+  echo Could not find .cabal file
+  exit 1
+fi
+
+PACKAGENAME=$(awk -F ":[[:space:]]*" 'tolower($1)=="name" { print $2 }' < "$CABALFILE")
+if [ -z "$PACKAGENAME" ]; then
+  echo "Unable to determine package name"
+  exit 1
+fi
+
+PACKAGEVER=$(awk -F ":[[:space:]]*" 'tolower($1)=="version" { print $2 }' < "$CABALFILE")
+if [ -z "$PACKAGEVER" ]; then
+  echo "Unable to determine package version"
+  exit 1
+fi
+
+cabal configure
+cabal build
+cabal haddock
+cabal sdist
+
+cd dist
+tar xvf $PACKAGENAME-$PACKAGEVER.tar.gz
+cd $PACKAGENAME-$PACKAGEVER
+cabal configure
+cabal build
+cabal haddock
+cabal sdist

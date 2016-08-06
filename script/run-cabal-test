@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  READLINK=greadlink
+else
+  READLINK=readlink
+fi
+SCRIPTPATH=$($READLINK -f $0)
+SCRIPTDIR=$(dirname $SCRIPTPATH)
+
+USERID=$(stat -c "%u" .)
+GROUPID=$(stat -c "%g" .)
+USERNAME=$(stat -c "%U" .)
+GROUPNAME=$(stat -c "%G" .)
+REPODIR=$(dirname $SCRIPTDIR)
+PROJECTNAME=$(basename $REPODIR)
+
+docker run \
+  -w /$PROJECTNAME \
+  -v $REPODIR:/$PROJECTNAME:ro \
+  -u $USERNAME \
+  --rm \
+  hgeos-cabal \
+  script/cabal-test-helper
+if [ $? -eq 0 ]; then
+  echo "Test passed"
+  true
+else
+  echo "Test failed"
+  false
+fi
