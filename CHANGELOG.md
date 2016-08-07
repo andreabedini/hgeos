@@ -1,3 +1,7 @@
+# vNext
+
+* Fixes createCollection
+
 # v0.1.7.3
 
 * Adds createCollection

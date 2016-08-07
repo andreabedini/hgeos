@@ -161,7 +161,7 @@ createCollection geometryType gs@((Geometry sr _ _) : _) = do
     withArrayLen (map geometryRawPtr gs) $ \count array ->
         checkAndTrackGeometry
             sr
-            (\hCtx -> c_GEOSGeom_createCollection_r hCtx (fromIntegral $ fromEnum geometryType) nullPtr (fromIntegral count))
+            (\hCtx -> c_GEOSGeom_createCollection_r hCtx (fromIntegral $ fromEnum geometryType) array (fromIntegral count))
 
 -- |Creates an empty 'CoordinateSequence' instance
 createCoordSeq :: Context -> Word -> Word -> IO (Maybe CoordinateSequence)

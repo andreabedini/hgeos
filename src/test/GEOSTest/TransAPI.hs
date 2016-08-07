@@ -3,7 +3,7 @@ module GEOSTest.TransAPI (demo) where
 import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
-import Data.Geolocation.GEOS (Context, Geometry)
+import Data.Geolocation.GEOS (Context, Geometry, GeometryType (..))
 import Data.Geolocation.GEOS.Trans
 import Data.Maybe
 
@@ -73,6 +73,10 @@ demo = do
         polygon <- createPolygonM shell [hole]
         str3 <- writeGeometryM writer polygon
         lift $ putStrLn str3
+
+        coll <- createCollectionM MultiPolygon [polygon]
+        str4 <- writeGeometryM writer coll
+        lift $ putStrLn str4
 
     case result of
          Left m -> error $ "TransAPI.demo failed: " ++ m
