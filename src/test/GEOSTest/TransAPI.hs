@@ -78,6 +78,10 @@ demo = do
         str4 <- writeGeometryM writer coll
         lift $ putStrLn str4
 
+        p <- createEmptyPolygonM ctx
+        str5 <- writeGeometryM writer p
+        lift $ putStrLn str5
+
     case result of
          Left m -> error $ "TransAPI.demo failed: " ++ m
          Right _ -> putStrLn "TransAPI.demo succeeded"
