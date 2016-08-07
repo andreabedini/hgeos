@@ -16,104 +16,28 @@ the API as and when I need specific GEOS functionality. If there are specific
 portions that you would like implemented, please open a [ticket][issues] or
 submit a [pull request][pull-requests] for it.
 
-## Prerequisites
+## Change log
 
-This project currently links dynamically to your global installation of GEOS
-which you'll need to install before you can build the code. Future versions may
-bake GEOS in directly.
+[View change log][change-log]
 
-### Mac OS X
+## Contributing
 
-Using [Homebrew][homebrew]:
-
-```bash
-$ brew install geos
-```
-
-### Ubuntu
-
-```bash
-$ sudo apt-get install libgeos++-dev
-```
-
-### Windows
-
-* Windows binaries are included in the repository and resulting package
-
-## Development
-
-This project uses [Stack][stack].
-
-### Configure
-
-```bash
-$ stack setup
-```
-
-### Clean
-
-```bash
-$ stack clean
-```
-
-### Build
-
-```bash
-$ stack build
-```
-
-### Test
-
-```bash
-$ stack test
-```
-
-### Build with C function tracing enabled
-
-```bash
-$ stack build --ghc-options -optc-DENABLE_TRACE
-```
-
-### Run containerized Cabal tests
-
-Create Docker image:
-
-```bash
-$ script/build-cabal-image
-```
-
-Run Cabal tests:
-
-```bash
-$ script/run-cabal-test
-```
-
-Run Cabal shell for debugging:
-
-```bash
-$ script/run-cabal-shell
-```
-
-### Build and run all tests
-
-```bash
-$ script/test
-```
+[View developer guide][dev-guide]
 
 ## Licence
 
 Released under MIT License
 
-Copyright (c) 2016 Richard Cook
+Copyright &copy; 2016 Richard Cook
 
 [capi]: http://geos.osgeo.org/doxygen/geos__c_8h_source.html
 [carnivore-tracker-viz]: https://public.tableau.com/profile/richard.cook#!/vizhome/CarnivoreTrackerTheNextGeneration/Heatmap
+[change-log]: CHANGELOG.md
 [data-geolocation-geos]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS.html
 [data-geolocation-geos-imports]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS-Imports.html
 [data-geolocation-geos-trans]: http://hackage.haskell.org/package/hgeos/docs/Data-Geolocation-GEOS-Trans.html
+[dev-guide]: DEV.md
 [django-gis]: https://github.com/django/django/tree/master/django/contrib/gis/geos
 [geos]: https://trac.osgeo.org/geos/
-[homebrew]: http://brew.sh/
 [issues]: https://github.com/rcook/hgeos/issues
 [pull-requests]: https://github.com/rcook/hgeos/pulls
-[stack]: https://haskellstack.org/
