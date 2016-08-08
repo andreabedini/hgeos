@@ -1,5 +1,10 @@
 # Change log
 
+## vNext
+
+* Removes `runGEOSEither`
+* Introduces `MonadGEOS`
+
 ## v0.1.7.4
 
 * Fixes `createCollection`

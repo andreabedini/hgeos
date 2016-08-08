@@ -2,18 +2,17 @@ module GEOSTest.TransAPI (demo) where
 
 import Control.Monad
 import Control.Monad.Trans
-import Control.Monad.Trans.Maybe
 import Data.Geolocation.GEOS (Context, Geometry, GeometryType (..))
 import Data.Geolocation.GEOS.Trans
 import Data.Maybe
 
-check :: Bool -> MaybeT IO ()
+check :: Bool -> MonadGEOS ()
 check True = return ()
 check False = error "Check failed"
 
 type Coordinate = (Double, Double)
 
-createLinearRing :: Context -> [Coordinate] -> MaybeT IO Geometry
+createLinearRing :: Context -> [Coordinate] -> MonadGEOS Geometry
 createLinearRing ctx cs = do
     let count = length cs
     coords <- createCoordSeqM ctx (fromIntegral count) 2
@@ -27,7 +26,7 @@ createLinearRing ctx cs = do
 -- which guarantees that they are released when the context goes out of scope
 demo :: IO ()
 demo = do
-    result <- runGEOSEither $ \ctx -> do
+    result <- runGEOS $ \ctx -> do
         reader <- mkReaderM ctx
         writer <- mkWriterM ctx
 
@@ -83,5 +82,5 @@ demo = do
         lift $ putStrLn str5
 
     case result of
-         Left m -> error $ "TransAPI.demo failed: " ++ m
+         Left (GEOSError m) -> error $ "TransAPI.demo failed: " ++ m
          Right _ -> putStrLn "TransAPI.demo succeeded"
