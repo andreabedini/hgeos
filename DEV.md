@@ -60,12 +60,6 @@ $ stack build --ghc-options -optc-DENABLE_TRACE
 
 ### Run containerized Cabal tests
 
-Create Docker image:
-
-```bash
-$ script/build-cabal-image
-```
-
 Run Cabal tests:
 
 ```bash
