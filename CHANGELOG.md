@@ -1,5 +1,9 @@
 # Change log
 
+## vNext
+
+* Abandons `MaybeT`/`ExceptT` error handling in favour of `throw`
+
 ## v0.1.7.4
 
 * Fixes `createCollection`
