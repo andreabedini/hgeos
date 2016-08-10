@@ -1,4 +1,4 @@
-module GEOSTest.HighLevelAPI2 (demo) where
+module GEOSTest.HighLevelAPI (demo) where
 
 import Control.Monad
 import Data.Geolocation.GEOS
@@ -19,7 +19,7 @@ createLinearRingHelper ctx cs = do
         setY coords i y
     createLinearRing coords
 
--- Demonstrates use of monad transformer API
+-- Demonstrates use of high-level API
 -- Lifetimes of GEOS objects are automatically managed by the context objects
 -- which guarantees that they are released when the context goes out of scope
 demo :: IO ()

@@ -15,11 +15,9 @@ For the low-level FFI bindings, see "Data.Geolocation.GEOS.Imports".
 
 For the monad transformer wrappers, see "Data.Geolocation.GEOS.Trans".
 
-<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/HighLevelAPI1.hs View sample 1>
+<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/HighLevelAPI.hs View sample 1>
 
-<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/HighLevelAPI2.hs View sample 2>
-
-<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/Sample.hs View sample 3>
+<https://github.com/rcook/hgeos/blob/master/src/test/GEOSTest/Sample.hs View sample 2>
 -}
 
 {-# LANGUAGE DeriveDataTypeable #-}

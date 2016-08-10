@@ -40,7 +40,6 @@ test-suite hgeos-app
                     , base >= 4.6 && < 5
                     , hgeos
   other-modules:      GEOSTest.Arith
-                    , GEOSTest.HighLevelAPI1
-                    , GEOSTest.HighLevelAPI2
+                    , GEOSTest.HighLevelAPI
                     , GEOSTest.LowLevelAPI
                     , GEOSTest.Sample
