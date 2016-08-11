@@ -140,16 +140,8 @@ area (Geometry sr _ h) = do
                 value <- peek valuePtr
                 return $ realToFrac value
 
-checkAndDoNotTrack :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
-checkAndDoNotTrack sr f = do
-    ContextState{..} <- readIORef sr
-    h <- f hCtx
-    return $ if isNullPtr h
-                then Nothing
-                else Just $ Geometry sr emptyDeleteAction h
-
-checkAndDoNotTrack2 :: String -> ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO Geometry
-checkAndDoNotTrack2 context sr f = do
+checkAndDoNotTrack :: String -> ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO Geometry
+checkAndDoNotTrack context sr f = do
     ContextState{..} <- readIORef sr
     h <- f hCtx
     if isNullPtr h
@@ -157,29 +149,13 @@ checkAndDoNotTrack2 context sr f = do
        else return $ Geometry sr emptyDeleteAction h
 
 checkAndTrack :: NullablePtr a =>
-    ContextStateRef ->
-    (GEOSContextHandle -> IO a) ->
-    (GEOSContextHandle -> a -> IO ()) ->
-    (ContextStateRef -> DeleteAction -> a -> b) ->
-    IO (Maybe b)
-checkAndTrack sr create destroy wrap = do
-    ContextState{..} <- readIORef sr
-    h <- create hCtx
-    if isNullPtr h
-    then return Nothing
-    else do
-        let deleteAction = DeleteAction (rawIntPtr h) (destroy hCtx h)
-        modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
-        return $ Just (wrap sr deleteAction h)
-
-checkAndTrack2 :: NullablePtr a =>
     String ->
     ContextStateRef ->
     (GEOSContextHandle -> IO a) ->
     (GEOSContextHandle -> a -> IO ()) ->
     (ContextStateRef -> DeleteAction -> a -> b) ->
     IO b
-checkAndTrack2 context sr create destroy wrap = do
+checkAndTrack context sr create destroy wrap = do
     ContextState{..} <- readIORef sr
     h <- create hCtx
     if isNullPtr h
@@ -189,11 +165,8 @@ checkAndTrack2 context sr create destroy wrap = do
         modifyIORef' sr (\p@ContextState{..} -> p { deleteActions = deleteAction : deleteActions })
         return $ wrap sr deleteAction h
 
-checkAndTrackGeometry :: ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO (Maybe Geometry)
-checkAndTrackGeometry sr create = checkAndTrack sr create c_GEOSGeom_destroy_r Geometry
-
-checkAndTrackGeometry2 :: String -> ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO Geometry
-checkAndTrackGeometry2 context sr create = checkAndTrack2 context sr create c_GEOSGeom_destroy_r Geometry
+checkAndTrackGeometry :: String -> ContextStateRef -> (GEOSContextHandle -> IO GEOSGeometryPtr) -> IO Geometry
+checkAndTrackGeometry context sr create = checkAndTrack context sr create c_GEOSGeom_destroy_r Geometry
 
 emptyDeleteAction :: DeleteAction
 emptyDeleteAction = DeleteAction (ptrToIntPtr nullPtr) (return ())
@@ -203,7 +176,7 @@ createCollection :: GeometryType -> [Geometry] -> IO Geometry
 createCollection geometryType gs@((Geometry sr _ _) : _) = do
     untrack sr (map geometryDeleteAction gs)
     withArrayLen (map geometryRawPtr gs) $ \count array ->
-        checkAndTrackGeometry2
+        checkAndTrackGeometry
             "GEOSGeom_createCollection_r"
             sr
             (\hCtx -> c_GEOSGeom_createCollection_r hCtx (fromIntegral $ fromEnum geometryType) array (fromIntegral count))
@@ -211,7 +184,7 @@ createCollection geometryType gs@((Geometry sr _ _) : _) = do
 -- |Creates an empty 'CoordinateSequence' instance
 createCoordSeq :: Context -> Word -> Word -> IO CoordinateSequence
 createCoordSeq (Context sr) size dims =
-    checkAndTrack2
+    checkAndTrack
         "GEOSCoordSeq_create_r"
         sr
         (\hCtx -> c_GEOSCoordSeq_create_r hCtx (fromIntegral size) (fromIntegral dims))
@@ -222,7 +195,7 @@ createCoordSeq (Context sr) size dims =
 createEmptyPolygon :: Context -> IO Geometry
 createEmptyPolygon (Context sr) = do
     ContextState{..} <- readIORef sr
-    checkAndTrackGeometry2
+    checkAndTrackGeometry
         "GEOSGeom_createEmptyPolygon_r"
         sr
         c_GEOSGeom_createEmptyPolygon_r
@@ -232,7 +205,7 @@ createEmptyPolygon (Context sr) = do
 createLinearRing :: CoordinateSequence -> IO Geometry
 createLinearRing (CoordinateSequence sr deleteAction h) = do
     untrack sr [deleteAction]
-    checkAndTrackGeometry2
+    checkAndTrackGeometry
         "GEOSGeom_createLinearRing_r"
         sr
         (\hCtx -> c_GEOSGeom_createLinearRing_r hCtx h)
@@ -243,7 +216,7 @@ createPolygon :: Geometry -> [Geometry] -> IO Geometry
 createPolygon (Geometry sr deleteAction h) holes = do
     untrack sr (deleteAction : map geometryDeleteAction holes)
     withArrayLen (map geometryRawPtr holes) $ \count array ->
-        checkAndTrackGeometry2
+        checkAndTrackGeometry
             "GEOSGeom_createPolygon_r"
             sr
             (\hCtx -> c_GEOSGeom_createPolygon_r hCtx h array (fromIntegral count))
@@ -252,7 +225,7 @@ createPolygon (Geometry sr deleteAction h) holes = do
 -- 'Geometry'
 envelope :: Geometry -> IO Geometry
 envelope (Geometry sr _ h) =
-    checkAndTrackGeometry2
+    checkAndTrackGeometry
         "GEOSEnvelope_r"
         sr
         (\hCtx -> c_GEOSEnvelope_r hCtx h)
@@ -283,7 +256,7 @@ getErrorMessage = c_getErrorMessage >>= peekCString
 -- supplied 'Geometry'
 getExteriorRing :: Geometry -> IO Geometry
 getExteriorRing (Geometry sr _ h) =
-    checkAndDoNotTrack2
+    checkAndDoNotTrack
         "GEOSGetExteriorRing_r"
         sr
         (\hCtx -> c_GEOSGetExteriorRing_r hCtx h)
@@ -291,7 +264,7 @@ getExteriorRing (Geometry sr _ h) =
 -- |Returns child 'Geometry' at given index
 getGeometry :: Geometry -> Int -> IO Geometry
 getGeometry (Geometry sr _ h) n =
-    checkAndDoNotTrack2
+    checkAndDoNotTrack
         "GEOSGetGeometryN_r"
         sr
         (\hCtx -> c_GEOSGetGeometryN_r hCtx h (fromIntegral n))
@@ -356,7 +329,7 @@ getZ = getOrdinateHelper "GEOSCoordSeq_getZ_r" c_GEOSCoordSeq_getZ_r
 -- supplied 'Geometry' instances:
 intersection :: Geometry -> Geometry -> IO Geometry
 intersection (Geometry sr0 _ h0) (Geometry sr1 _ h1) =
-    checkAndTrackGeometry2
+    checkAndTrackGeometry
         "GEOSIntersection_r"
         sr0
         (\hCtx -> c_GEOSIntersection_r hCtx h0 h1)
@@ -381,7 +354,7 @@ mkContext = do
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
 mkReader :: Context -> IO Reader
 mkReader (Context sr) =
-    checkAndTrack2
+    checkAndTrack
         "GEOSWKTReader_create_r"
         sr
         c_GEOSWKTReader_create_r
@@ -392,7 +365,7 @@ mkReader (Context sr) =
 -- <https://en.wikipedia.org/wiki/Well-known_text WKT>-format text:
 mkWriter :: Context -> IO Writer
 mkWriter (Context sr) =
-    checkAndTrack2
+    checkAndTrack
         "GEOSWKTWriter_destroy_r"
         sr
         c_GEOSWKTWriter_create_r
@@ -403,7 +376,7 @@ mkWriter (Context sr) =
 -- supplied 'Reader':
 readGeometry :: Reader -> String -> IO Geometry
 readGeometry (Reader sr _ h) str = withCString str $ \cs -> do
-    checkAndTrackGeometry2
+    checkAndTrackGeometry
         "GEOSWKTReader_read_r"
         sr
         (\hCtx -> c_GEOSWKTReader_read_r hCtx h cs)
