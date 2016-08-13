@@ -24,11 +24,11 @@ For the monad transformer wrappers, see "Data.Geolocation.GEOS.Trans".
 {-# LANGUAGE RecordWildCards #-}
 
 module Data.Geolocation.GEOS
-    ( Context ()
+    ( module Data.Geolocation.GEOS.Internal
+    , Context ()
     , CoordinateSequence ()
     , GEOSError ()
     , Geometry ()
-    , GeometryType (..)
     , Reader ()
     , Writer ()
     , area
@@ -67,6 +67,7 @@ import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.Geolocation.GEOS.Imports
+import Data.Geolocation.GEOS.Internal
 import Data.IORef
 import Data.Typeable
 import Data.Word
@@ -90,17 +91,6 @@ type ContextStateRef = IORef ContextState
 data CoordinateSequence = CoordinateSequence ContextStateRef DeleteAction GEOSCoordSequencePtr
 
 data DeleteAction = DeleteAction IntPtr (IO ())
-
--- |Represents a <https://trac.osgeo.org/geos/ GEOS> geometry type ID
-data GeometryType =
-    Point |
-    LineString |
-    LinearRing |
-    Polygon |
-    MultiPoint |
-    MultlLineString |
-    MultiPolygon |
-    GeometryCollection deriving (Enum, Show)
 
 -- |References a <https://en.wikipedia.org/wiki/Well-known_text WKT> reader
 data Reader = Reader ContextStateRef DeleteAction GEOSWKTReaderPtr
@@ -179,7 +169,7 @@ createCollection geometryType gs@((Geometry sr _ _) : _) = do
         checkAndTrackGeometry
             "GEOSGeom_createCollection_r"
             sr
-            (\hCtx -> c_GEOSGeom_createCollection_r hCtx (fromIntegral $ fromEnum geometryType) array (fromIntegral count))
+            (\hCtx -> c_GEOSGeom_createCollection_r hCtx (unGeometryType geometryType) array (fromIntegral count))
 
 -- |Creates an empty 'CoordinateSequence' instance
 createCoordSeq :: Context -> Word -> Word -> IO CoordinateSequence
@@ -237,7 +227,7 @@ geomTypeId (Geometry sr _ h) = do
     value <- c_GEOSGeomTypeId_r hCtx h
     if value == -1
        then throwGEOSError "GEOSGeomTypeId_r"
-       else return $ toEnum (fromIntegral value)
+       else return $ GeometryType value
 
 -- |Returns a 'CoordinateSequence' from the supplied 'Geometry'
 getCoordSeq :: Geometry -> IO CoordinateSequence

@@ -30,6 +30,7 @@ library
   cc-options:         -std=c99 -pthread
   exposed-modules:    Data.Geolocation.GEOS
                     , Data.Geolocation.GEOS.Imports
+                    , Data.Geolocation.GEOS.Internal
 
 test-suite hgeos-app
   type:               exitcode-stdio-1.0

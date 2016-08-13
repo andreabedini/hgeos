@@ -1,3 +1,4 @@
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module GEOSTest.Sample (demo) where
@@ -122,10 +123,9 @@ generatePolygonMeshSQL ctx wkt resolution = do
         isOverlapEmpty <- isEmpty overlap
         unless isOverlapEmpty $ do
             typeId <- geomTypeId overlap
-            polygon <- case typeId of
-                            MultiPolygon -> findBiggestPolygon overlap
-                            Polygon -> return overlap
-            processPolygon "TABLE_NAME" resolution longitude latitude polygon
+            p <- if | typeId == multiPolygon -> findBiggestPolygon overlap
+                    | typeId == polygon -> return overlap
+            processPolygon "TABLE_NAME" resolution longitude latitude p
     return ()
 
 demo :: IO ()

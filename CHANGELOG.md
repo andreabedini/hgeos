@@ -1,5 +1,9 @@
 # Change log
 
+## vNext
+
+* Refactors `GeometryType`
+
 ## v0.1.8.0
 
 * Abandons `MaybeT`/`ExceptT` error handling in favour of `throw`

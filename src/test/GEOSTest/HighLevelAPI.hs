@@ -77,7 +77,7 @@ demo = do
         str3 <- writeGeometry writer polygon
         putStrLn str3
 
-        coll <- createCollection MultiPolygon [polygon]
+        coll <- createCollection multiPolygon [polygon]
         str4 <- writeGeometry writer coll
         putStrLn str4
 
