@@ -6,6 +6,11 @@ This project currently links dynamically to your global installation of GEOS
 which you'll need to install before you can build the code. Future versions may
 bake GEOS in directly.
 
+You will need at least version 3.3 of [GEOS][geos]. You can try installing from
+your package repository, but be warned that this might install an old version
+of the library which might result in missing functions during link of the
+package.
+
 ### Mac OS X
 
 Using [Homebrew][homebrew]:
@@ -84,5 +89,6 @@ Released under MIT License
 
 Copyright (c) 2016 Richard Cook
 
+[geos]: https://trac.osgeo.org/geos
 [homebrew]: http://brew.sh/
 [stack]: https://haskellstack.org/

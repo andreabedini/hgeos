@@ -3,6 +3,7 @@
 ## vNext
 
 * Refactors `GeometryType`
+* Adds note about supported version of GEOS library
 
 ## v0.1.8.0
 
